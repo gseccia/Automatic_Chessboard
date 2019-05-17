@@ -109,4 +109,4 @@ void lcd_send_string (char *str, int n_line);
  * sending data)
  * DESCRIBE BETTER...
  */
-void lcd_clear(void){};
+void lcd_clear(void);

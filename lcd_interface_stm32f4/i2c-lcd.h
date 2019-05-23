@@ -1,8 +1,7 @@
-#ifndef I2C-LCD_H_   /* Include guard */
-#define I2C-LCD_H_
-
+#ifndef I2C-LCD_H_
 #include "stm32f4xx_hal.h"
 #include "String.h"
+#define I2C-LCD_H_
 
 // commands
 typedef enum {
@@ -110,3 +109,5 @@ void lcd_send_string (char *str, int n_line);
  * DESCRIBE BETTER...
  */
 void lcd_clear(void);
+
+#endif

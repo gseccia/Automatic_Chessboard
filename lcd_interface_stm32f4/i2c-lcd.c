@@ -36,24 +36,26 @@ void lcd_init (void) {
 	lcd_send_cmd (0x28);
 	lcd_send_cmd (0x0C);
 	lcd_send_cmd (0x80);
+	HAL_Delay(1);
 }
 
 void lcd_send_string (char *str, int n_line) {
 	if(n_line != 2 && n_line != 1) {
-		n_line=1;
+			n_line=1;
 	}
 	if(strlen(str)>16){
-		strlen[15]='\0';
+		str[15]='\0';
 	}
 	if( n_line == 2 ) {
-		lcd_send_cmd(0x80);
-	}else{
 		lcd_send_cmd(0xC0);
+	}else{
+		lcd_send_cmd(0x80);
 	}
 	while (*str) lcd_send_data (*str++);
 }
 
 void lcd_clear(void){
-	lcd_send_cmq(LCD_CLEARDISPLAY);
+	lcd_send_cmd(LCD_CLEARDISPLAY);
 	lcd_send_cmd(LCD_RETURNHOME);
+	HAL_Delay(1);
 }

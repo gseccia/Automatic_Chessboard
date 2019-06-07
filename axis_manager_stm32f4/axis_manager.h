@@ -24,6 +24,7 @@ typedef struct Axis_manager Axis_manager;
 
 #define UNKNOWN -2
 #define ORIGIN -1
+#define OUT_CHESSBOARD 10
 
 /**
  * This fuction creates a new axis manager.
@@ -39,11 +40,16 @@ void axis_manager_reset_position(Axis_manager* axis);
 /**
  * This function moves the steppers from current position to (row,column) cell
  */
-void axis_manager_move(Axis_manager* axis,int row,int column);
+void axis_manager_move(Axis_manager* axis,int start_row,int start_column,int end_row,int end_column);
 
 /**
  * This function return 1 if the axis is arrived to the limit (x limit x parameter 1, y limit otherwise)
  */
 int axis_manager_check_limit(Axis_manager* axis,int x,int back);
+
+/**
+ * This function destoy the object
+ */
+void axis_manager_destoy(Axis_manager* axis);
 
 #endif

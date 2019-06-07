@@ -55,7 +55,6 @@ void axis_manager_reset_position(Axis_manager* axis){
 	axis->current_position.column = ORIGIN;
 }
 
-
 void axis_manager_move(Axis_manager* axis,int start_row,int start_column,int end_row,int end_column){
 	int drow,dcol;
 
@@ -125,4 +124,6 @@ int axis_manager_check_limit(Axis_manager* axis,int x,int back){
 	}
 }
 
-
+void axis_manager_destoy(Axis_manager* axis){
+	free(axis);
+}

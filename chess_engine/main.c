@@ -40,17 +40,15 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include "Chess.h"
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "Chess.h"
+#include "axis_manager.h"
+#include "API_magneticGrid.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -149,6 +147,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
+  MX_TIM11_Init();
   /* USER CODE BEGIN 2 */
 
   init_board(board);
@@ -160,51 +159,52 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
 	  if ( (SETTINGS) || (TWO_PLAYERS_MODE) || (WHITE_TURN&&PLAYER_WHITE) || ((!WHITE_TURN)&&(!PLAYER_WHITE)) )
-	    		{
-	    			if ( GAME && (GAME_STATUS = game_over(board)) ) GAME = 0;
-	    			if( !GAME && !SETTINGS ) // end the game
-	    			{
-	    				declare_winner();
-	    				quit();
-	    			}
-	    			/*if( GAME && !repeat && is_check(board, WHITE_TURN)) print_message(CHECK)
-	    			if ( GAME )	print_message(ENTER_MOVE(WHITE_TURN));
-	    			if ( SETTINGS ) print_message(ENTER_SETTINGS);
-	    			read_input(input);
-	    			if( strcmp(input,"") == 0 ) continue; // verify input isn't empty.
-	    			if ( strcmp(input, "quit") == 0 ) quit();*/
-	    		}
-	    		if ( SETTINGS )
-	    		{
-	    			//parse_input_settings(input);
-	    			DO_DEBUG
-	    			(
-	    				printf("user color is: %d\n", PLAYER_WHITE);
-	    				printf("minmax depth is: %d\n", MINIMAX_DEPTH);
-	    				printf("next player is: %d\n", WHITE_TURN);
-	    				printf("game mode is: %d\n", TWO_PLAYERS_MODE);
-	    			)
-	    		}
-	    		else if ( GAME )
-	    		{
+	  	    		{
+	  	    			if ( GAME && (GAME_STATUS = game_over(board)) ) GAME = 0;
+	  	    			if( !GAME && !SETTINGS ) // end the game
+	  	    			{
+	  	    				declare_winner();
+	  	    				quit();
+	  	    			}
+	  	    			/*if( GAME && !repeat && is_check(board, WHITE_TURN)) print_message(CHECK)
+	  	    			if ( GAME )	print_message(ENTER_MOVE(WHITE_TURN));
+	  	    			if ( SETTINGS ) print_message(ENTER_SETTINGS);
+	  	    			read_input(input);
+	  	    			if( strcmp(input,"") == 0 ) continue; // verify input isn't empty.
+	  	    			if ( strcmp(input, "quit") == 0 ) quit();*/
+	  	    		}
+	  	    		if ( SETTINGS )
+	  	    		{
+	  	    			//parse_input_settings(input);
+	  	    			DO_DEBUG
+	  	    			(
+	  	    				printf("user color is: %d\n", PLAYER_WHITE);
+	  	    				printf("minmax depth is: %d\n", MINIMAX_DEPTH);
+	  	    				printf("next player is: %d\n", WHITE_TURN);
+	  	    				printf("game mode is: %d\n", TWO_PLAYERS_MODE);
+	  	    			)
+	  	    		}
+	  	    		else if ( GAME )
+	  	    		{
 
-	    			if ( (TWO_PLAYERS_MODE) || (WHITE_TURN&&PLAYER_WHITE) || ((!WHITE_TURN)&&(!PLAYER_WHITE)) ) //user's turn
-	    			{
-	    				if(player_input_game_manager() == 0 ) //'1' if user's input was wrong in some way or need another input
-	    					WHITE_TURN = (WHITE_TURN + 1)%2;
-	    				//ANTONIO Mossa fatta dall'utente
-	    			}
-	    			else play_computer_turn(board); //computer's turn
+	  	    			if ( (TWO_PLAYERS_MODE) || (WHITE_TURN&&PLAYER_WHITE) || ((!WHITE_TURN)&&(!PLAYER_WHITE)) ) //user's turn
+	  	    			{
+	  	    				if(player_input_game_manager() == 0 ) //'1' if user's input was wrong in some way or need another input
+	  	    					WHITE_TURN = (WHITE_TURN + 1)%2;
+	  	    				//ANTONIO Mossa fatta dall'utente
+	  	    			}
+	  	    			else play_computer_turn(board); //computer's turn
 
-	    			print_board(board,pretty_board);
-	    			// WHITE_TURN = (WHITE_TURN + 1)%2;
-	    		}
-	 HAL_UART_Transmit(&huart2,pretty_board,strlen(pretty_board)*sizeof(char),1000);
-  	 HAL_Delay(1000);
+	  	    			print_board(board,pretty_board);
+	  	    			// WHITE_TURN = (WHITE_TURN + 1)%2;
+	  	    		}
+	  	 HAL_UART_Transmit(&huart2,pretty_board,strlen(pretty_board)*sizeof(char),1000);
+	    	 HAL_Delay(1000);
   }
-
-  /* USER CODE BEGIN 3 */
   /* USER CODE END 3 */
 }
 

@@ -452,12 +452,12 @@ int player_input_game_manager(){
 	move *m = fetch_moves(grid_manager);
 
 	location from;
-	from.row = m->from.row;
-	from.column = m->from.column;
+	from.row = m->from->row;
+	from.column = m->from->column;
 
 	location to;
-	to.row = m->to.row;
-	to.column = m->to.column;
+	to.row = m->to->row;
+	to.column = m->to->column;
 
 	if ( !is_legal_location(from) || !is_legal_location(to))
 	{

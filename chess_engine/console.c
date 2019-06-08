@@ -8,9 +8,10 @@
 
 #include "axis_manager.h"
 #include "API_magneticGrid.h"
+
 //ANTONIO LIBRERIA DISPLAY DA AGGIUNGERE
 extern Axis_manager* axis_manager;
-extern magnetic_grid_manager* magnetic_grid_manager;
+extern struct magnetic_grid_manager* grid_manager;
 
 // Genral settings
 extern int MINIMAX_DEPTH;
@@ -447,8 +448,8 @@ int player_input_game_manager(){
 	while(WHITE_TURN == PLAYER_WHITE); // il player deve passare il turno (interrupt input PIN);
 
 	// Read the grid and get the move
-	update_magnetic_grid(magnetic_grid_manager);
-	move *m = fetch_moves(magnetic_grid_manager);
+	update_magnetic_grid(grid_manager);
+	move *m = fetch_moves(grid_manager);
 
 	location from;
 	from.row = m->from.row;

@@ -14,12 +14,12 @@
   */
 #include "Chess.h"
 #include "gpio.h"
+#include <stdlib.h>
 
-struct magnetic_grid_manager{
+typedef struct magnetic_grid_manager{
 	uint8_t magnetic_grid[8][8];
 	uint8_t old_magnetic_grid[8][8];
-};
-typedef struct magnetic_grid_manager magnetic_grid_manager;
+} magnetic_grid_manager;
 
 
 magnetic_grid_manager* init_magnetic_grid();

@@ -1,8 +1,9 @@
 #include "API_magneticGrid.h"
 
+typedef struct magnetic_grid_manager magnetic_grid_manager;
 
-struct magnetic_grid_manager* init_magnetic_grid(){
-	struct magnetic_grid_manager* magnetic_manager = (struct magnetic_grid_manager*)malloc(sizeof(struct magnetic_grid_manager));
+magnetic_grid_manager* init_magnetic_grid(){
+	struct magnetic_grid_manager* magnetic_manager = (magnetic_grid_manager*)malloc(sizeof(magnetic_grid_manager));
 	int i,j;
 	for(i=0;i<8;i++){
 		for(j=0;j<8;j++){
@@ -17,7 +18,7 @@ struct magnetic_grid_manager* init_magnetic_grid(){
   * @param  the matrix to fill
   * @retval None
   */
-void update_magnetic_grid(struct magnetic_grid_manager* magnetic_grid_manager){
+void update_magnetic_grid(magnetic_grid_manager* magnetic_grid_manager){
 
 	int i,j;
 	for(i=0;i<8;i++){
@@ -27,7 +28,7 @@ void update_magnetic_grid(struct magnetic_grid_manager* magnetic_grid_manager){
 	}
 
 	uint16_t pins[8] = {GPIO_PIN_8,GPIO_PIN_10,GPIO_PIN_4,GPIO_PIN_5,GPIO_PIN_3,GPIO_PIN_10,GPIO_PIN_4,GPIO_PIN_13};
-	(GPIO_TypeDef*) str_pins[8] = {GPIOA,GPIOB,GPIOB,GPIOB,GPIOB,GPIOA,GPIOC,GPIOB};
+	GPIO_TypeDef* str_pins[8] = {GPIOA,GPIOB,GPIOB,GPIOB,GPIOB,GPIOA,GPIOC,GPIOB};
 
 	for(i=0;i<8;i++){
 		HAL_GPIO_WritePin(str_pins[i], pins[i], SET);
@@ -49,7 +50,7 @@ void update_magnetic_grid(struct magnetic_grid_manager* magnetic_grid_manager){
 }
 
 // Da rivedere per rilevare più mosse.
-move* fetch_moves(struct magnetic_grid_manager* magnetic_grid_manager){
+move* fetch_moves(magnetic_grid_manager* magnetic_grid_manager){
 	int i,j;
 
 	move* l;
@@ -66,12 +67,12 @@ move* fetch_moves(struct magnetic_grid_manager* magnetic_grid_manager){
 				}
 
 				if((magnetic_grid_manager->magnetic_grid)[i][j] - (magnetic_grid_manager->old_magnetic_grid)[i][j] > 0){
-					l.to->row = i;
-					l.to->column = j;
+					l->to->row = i;
+					l->to->column = j;
 				}
 				else{
-					l.from->row = i;
-					l.from->column = j;
+					l->from->row = i;
+					l->from->column = j;
 				}
 			}
 		}

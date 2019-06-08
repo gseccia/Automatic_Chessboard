@@ -4,7 +4,7 @@
  *  Created on: 07 giu 2019
  *      Author: Antonio
  */
-#include "axis_manager.h";
+#include "axis_manager.h"
 
 typedef struct Axis_manager Axis_manager;
 

@@ -127,7 +127,7 @@ int main(void)
 	char board[BOARD_SIZE][BOARD_SIZE];
 	char pretty_board[1000];
 	Axis_manager* axis_manager = axis_manager_init(); // inserire tutti i parametri;
-
+	struct magnetic_grid_manager* grid_manager = init_magnetic_grid();
 
   /* USER CODE END 1 */
 

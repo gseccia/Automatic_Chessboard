@@ -1,9 +1,9 @@
 #ifndef AXIS_MANAGER_
 #define AXIS_MANAGER_
 
-#include "Stepper.h";
-#include "hook.h";
-#include "gpio.h";
+#include "Stepper.h"
+#include "hook.h"
+#include "gpio.h"
 
 struct cell{
 	int row;

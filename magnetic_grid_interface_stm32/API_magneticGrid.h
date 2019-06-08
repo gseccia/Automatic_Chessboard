@@ -12,6 +12,19 @@
   * @param  the matrix to fill
   * @retval None
   */
-void fetch_magnetic_grid(uint8_t* magnetic_grid);
+#include "Chess.h"
+#include "gpio.h"
+
+struct magnetic_grid_manager{
+	uint8_t magnetic_grid[8][8];
+	uint8_t old_magnetic_grid[8][8];
+};
+typedef struct magnetic_grid_manager magnetic_grid_manager;
+
+
+magnetic_grid_manager* init_magnetic_grid();
+void update_magnetic_grid(magnetic_grid_manager* magnetic_grid_manager);
+move* fetch_moves(magnetic_grid_manager* magnetic_grid_manager);
+
 
 #endif /* SRC_API_MAGNETICGRID_H_ */

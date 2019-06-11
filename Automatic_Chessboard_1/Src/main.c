@@ -128,20 +128,20 @@ int main(void)
   MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
 
-	axis_manager = axis_manager_init(&htim2,100,GPIOB,GPIO_PIN_1,GPIOC,GPIO_PIN_8,1,GPIOB,GPIO_PIN_2,GPIOC,GPIO_PIN_5,1,GPIOB,GPIO_PIN_13,GPIOB,GPIO_PIN_14);
+	axis_manager = axis_manager_init(&htim2,100,GPIOB,GPIO_PIN_1,GPIOC,GPIO_PIN_8,3,GPIOB,GPIO_PIN_2,GPIOC,GPIO_PIN_5,3,GPIOB,GPIO_PIN_13,GPIOB,GPIO_PIN_14);
 	grid_manager = init_magnetic_grid();
 
 
-  init_board(board);
-  print_board(board,pretty_board); //prints only if in console mode
+    init_board(board);
 
+  //print_board(board,pretty_board); //prints only if in console mode
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* USER CODE END WHILE */
+	/* USER CODE END WHILE*/
 	  if ( (SETTINGS) || (TWO_PLAYERS_MODE) || (WHITE_TURN&&PLAYER_WHITE) || ((!WHITE_TURN)&&(!PLAYER_WHITE)) )
 	    	  	    		{
 	    	  	    			if ( GAME && (GAME_STATUS = game_over(board)) ) GAME = 0;
@@ -150,12 +150,12 @@ int main(void)
 	    	  	    				declare_winner();
 	    	  	    				quit();
 	    	  	    			}
-	    	  	    			/*if( GAME && !repeat && is_check(board, WHITE_TURN)) print_message(CHECK)
-	    	  	    			if ( GAME )	print_message(ENTER_MOVE(WHITE_TURN));
-	    	  	    			if ( SETTINGS ) print_message(ENTER_SETTINGS);
-	    	  	    			read_input(input);
-	    	  	    			if( strcmp(input,"") == 0 ) continue; // verify input isn't empty.
-	    	  	    			if ( strcmp(input, "quit") == 0 ) quit();*/
+	    	  	    			//if( GAME && !repeat && is_check(board, WHITE_TURN)) print_message(CHECK)
+	    	  	    			//if ( GAME )	print_message(ENTER_MOVE(WHITE_TURN));
+	    	  	    			//if ( SETTINGS ) print_message(ENTER_SETTINGS);
+	    	  	    			//read_input(input);
+	    	  	    			//if( strcmp(input,"") == 0 ) continue; // verify input isn't empty.
+	    	  	    			//if ( strcmp(input, "quit") == 0 ) quit();
 	    	  	    		}
 	    	  	    		if ( SETTINGS )
 	    	  	    		{

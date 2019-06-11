@@ -8,7 +8,7 @@
 #include "gpio.h"
 
 
-Stepper stepper_init(GPIO_TypeDef* group_pin_direction, uint16_t pin_direction, GPIO_TypeDef* group_pin_step, uint16_t pin_step, uint16_t step_delay){
+Stepper stepper_init(GPIO_TypeDef* group_pin_direction, uint16_t pin_direction, GPIO_TypeDef* group_pin_step, uint16_t pin_step, uint32_t step_delay){
 	Stepper s = {
 	  .group_pin_direction = group_pin_direction,
 	  .pin_direction = pin_direction,
@@ -22,21 +22,21 @@ Stepper stepper_init(GPIO_TypeDef* group_pin_direction, uint16_t pin_direction, 
 // direction setter methood:
 void setDirection(Stepper* s, Step_direction direction){
     if(direction == FORWARD)
-    	HAL_GPIO_WritePin(s->group_pin_direction, s->pin_direction, SET);
+    	HAL_GPIO_WritePin(s->group_pin_direction, s->pin_direction, GPIO_PIN_SET);
     else if(direction == BACKWARD)
-    	HAL_GPIO_WritePin(s->group_pin_direction, s->pin_direction, RESET);
+    	HAL_GPIO_WritePin(s->group_pin_direction, s->pin_direction, GPIO_PIN_RESET);
 }
 
 // mover method:
 
-void move_n_steps(Stepper* s, uint16_t number_of_steps, Step_direction direction){
+void move_n_steps(Stepper* s, int number_of_steps, Step_direction direction){
 
 	setDirection(s,direction);
-
-	for(int i=0; i<number_of_steps; i++){
-		HAL_GPIO_WritePin(s->group_pin_step, s->pin_step, SET);
+	int i;
+	for(i=0; i<number_of_steps; i++){
+		HAL_GPIO_WritePin(s->group_pin_step, s->pin_step, GPIO_PIN_SET);
 		HAL_Delay(s->step_delay);
-		HAL_GPIO_WritePin(s->group_pin_step, s->pin_step, RESET);
+		HAL_GPIO_WritePin(s->group_pin_step, s->pin_step, GPIO_PIN_RESET);
 		HAL_Delay(s->step_delay);
 	}
 }

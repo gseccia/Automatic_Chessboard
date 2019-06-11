@@ -47,22 +47,22 @@ typedef enum {
 } Step_direction;
 
 typedef struct Stepper{
-	uint16_t group_pin_direction;
-	GPIO_TypeDef* pin_direction;
-	uint16_t group_pin_step;
-	GPIO_TypeDef* pin_step;
-	uint16_t step_delay;
+	GPIO_TypeDef* group_pin_direction;
+	uint16_t pin_direction;
+	GPIO_TypeDef* group_pin_step;
+	uint16_t pin_step;
+	uint32_t step_delay;
 }Stepper;
 
 //Initializer
-Stepper stepper_init(GPIO_TypeDef* group_pin_direction, uint16_t pin_direction, GPIO_TypeDef* group_pin_step, uint16_t pin_step, uint16_t step_delay);
+Stepper stepper_init(GPIO_TypeDef* group_pin_direction, uint16_t pin_direction, GPIO_TypeDef* group_pin_step, uint16_t pin_step, uint32_t step_delay);
 
 
 // direction setter methood:
 void setDirection(Stepper* stepper,Step_direction new_direction);
 
 
-void move_n_steps(Stepper* stepper, uint16_t number_of_steps, Step_direction direction);
+void move_n_steps(Stepper* stepper, int number_of_steps, Step_direction direction);
 
 void move_half_cell(Stepper* stepper, Step_direction direction);
 

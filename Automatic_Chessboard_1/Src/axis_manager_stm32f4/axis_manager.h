@@ -32,7 +32,7 @@ typedef struct Axis_manager Axis_manager;
  * This fuction creates a new axis manager.
  *  front_x, back_x, front_y, back_y are the PIN to read the limits.
  */
-Axis_manager* axis_manager_init(TIM_HandleTypeDef *tim_pwm_handler,int frequency,GPIO_TypeDef* motorAgroup_dir,uint16_t motorAPin_dir,GPIO_TypeDef* motorAgroup_step,uint16_t motorAPin_step,uint16_t motorA_delay,GPIO_TypeDef* motorBgroup_dir,uint16_t motorBPin_dir,GPIO_TypeDef* motorBgroup_step,uint16_t motorBPin_step,uint16_t motorB_delay,GPIO_TypeDef* xgroup,GPIO_TypeDef* ygroup,uint16_t xpin,uint16_t ypin);
+Axis_manager* axis_manager_init(TIM_HandleTypeDef *tim_pwm_handler,int frequency,GPIO_TypeDef* motorAgroup_dir,uint16_t motorAPin_dir,GPIO_TypeDef* motorAgroup_step,uint16_t motorAPin_step,uint32_t motorA_delay,GPIO_TypeDef* motorBgroup_dir,uint16_t motorBPin_dir,GPIO_TypeDef* motorBgroup_step,uint16_t motorBPin_step,uint32_t motorB_delay,GPIO_TypeDef* xgroup,GPIO_TypeDef* ygroup,uint16_t xpin,uint16_t ypin);
 
 /**
  * This function resets the current logical and hardware position of Steppers to the Origin.

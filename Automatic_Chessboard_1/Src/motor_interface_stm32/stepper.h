@@ -39,41 +39,33 @@
 #ifndef STEPPER_H_
 #define STEPPER_H_
 
-/**
- * THIS LIBRARY WILL CONSIDER
- * IN1 -> PA0
- * IN2 -> PA1
- * IN3 -> PA4
- * IN4 -> PB0
- *
- * change
- */
+#include "gpio.h"
+
+typedef enum {
+	FORWARD  		= 1,
+	BACKWARD        = -1,
+} Step_direction;
 
 typedef struct Stepper{
-	int direction;
-	double step_delay;
-	int number_of_steps; // total number of steps
-	int step_number;          // which step the motor is on
+	uint16_t s.group_pin_direction;
+	GPIO_TypeDef* s.pin_direction;
+	uint16_t step_delay;
 }Stepper;
 
 //Initializer
-Stepper stepper_init();
+Stepper stepper_init(GPIO_TypeDef* group_pin_direction, uint16_t pin_direction, GPIO_TypeDef* group_pin_step, uint16_t pin_step, uint16_t step_delay);
 
-// speed setter method: velocità accettabili sull'ordine delle migliaia (1000-5000)
-void setSpeed(Stepper* stepper, int whatSpeed);
 
 // direction setter methood:
-void setDirection(Stepper* stepper,int new_direction);
+void setDirection(Stepper* stepper,Step_direction new_direction);
 
-// mover method:
-void step(int thisStep);
 
-void move_n_steps(Stepper* stepper, int number_of_steps);
+void move_n_steps(Stepper* stepper, uint16_t number_of_steps, Step_direction direction);
 
-void move_half_cell(Stepper* stepper);
+void move_half_cell(Stepper* stepper, Step_direction direction);
 
-void move_full_cell(Stepper* stepper);
+void move_full_cell(Stepper* stepper,Step_direction direction);
 
-void move_n_cells(Stepper* stepper, int num_cell);
+void move_n_cells(Stepper* stepper, int num_cell, Step_direction direction);
 
 #endif /* STEPPER_H_ */

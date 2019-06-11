@@ -9,7 +9,7 @@
 #define SCELTA_H_
 #include "stm32f4xx_hal.h"
 #include "String.h"
-#include "i2c-lcd.h"
+#include "../lcd_interface_stm32f4/i2c-lcd.h"
 
 
 /*typedef struct SCELTA{

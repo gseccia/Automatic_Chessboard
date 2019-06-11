@@ -12,7 +12,7 @@
   * @param  the matrix to fill
   * @retval None
   */
-#include "Chess.h"
+#include "../chess_engine/Chess.h"
 #include "gpio.h"
 #include <stdlib.h>
 

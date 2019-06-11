@@ -5,7 +5,6 @@
  *      Author: salva
  */
 #include "scelta.h"
-#include "i2c-lcd.h"
 #include "adc.h"
 #include "string.h"
 #include "gpio.h"

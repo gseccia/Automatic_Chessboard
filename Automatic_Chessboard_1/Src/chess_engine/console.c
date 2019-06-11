@@ -6,8 +6,8 @@
 #include <time.h>
 #include "Chess.h"
 
-#include "axis_manager.h"
-#include "API_magneticGrid.h"
+#include "../axis_manager_stm32f4/axis_manager.h"
+#include "../magnetic_grid_interface_stm32/API_magneticGrid.h"
 
 //ANTONIO LIBRERIA DISPLAY DA AGGIUNGERE
 extern Axis_manager* axis_manager;

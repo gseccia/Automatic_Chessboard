@@ -37,16 +37,16 @@ void axis_manager_reset_position(Axis_manager* axis){
 	SERVO_HOOK_off(&(axis->hook));
 
 	while(!axis_manager_check_limit(axis,1) && !axis_manager_check_limit(axis,0)){
-		move_half_cell(&(axis->x_stepper),BACKWORD);
-		move_half_cell(&(axis->y_stepper),BACKWORD);
+		move_half_cell(&(axis->x_stepper),BACKWARD);
+		move_half_cell(&(axis->y_stepper),BACKWARD);
 	}
 
 	while(!axis_manager_check_limit(axis,1)){
-			move_half_cell(&(axis->x_stepper),BACKWORD);
+			move_half_cell(&(axis->x_stepper),BACKWARD);
 	}
 
 	while(!axis_manager_check_limit(axis,0)){
-			move_half_cell(&(axis->y_stepper),BACKWORD);
+			move_half_cell(&(axis->y_stepper),BACKWARD);
 	}
 
 	axis->current_position.row = ORIGIN;
@@ -63,15 +63,15 @@ void axis_manager_move(Axis_manager* axis,int start_row,int start_column,int end
 
 	if(drow < 0){
 		drow = -drow;
-		dirx = BACKWORD;
+		dirx = BACKWARD;
 	}
-	else dirx = FORWORD;
+	else dirx = FORWARD;
 
 	if(dcol < 0){
 			dcol = -dcol;
-			diry = BACKWORD;
+			diry = BACKWARD;
 	}
-	else diry = FORWORD;
+	else diry = FORWARD;
 
 	move_n_cells(&(axis->x_stepper), drow,dirx);
 	move_n_cells(&(axis->y_stepper), dcol,diry);
@@ -80,7 +80,7 @@ void axis_manager_move(Axis_manager* axis,int start_row,int start_column,int end
 	SERVO_HOOK_on(&(axis->hook));
 
 	// Move on the boundary
-	move_half_cell(&(axis->x_stepper),FORWORD);
+	move_half_cell(&(axis->x_stepper),FORWARD);
 
 	// Move the steppers to the end position
 	drow = end_row - start_row;
@@ -88,21 +88,21 @@ void axis_manager_move(Axis_manager* axis,int start_row,int start_column,int end
 
 	if(drow < 0){
 			drow = -drow;
-			dirx = BACKWORD;
+			dirx = BACKWARD;
 	}
-	else dirx = FORWORD;
+	else dirx = FORWARD;
 
 	if(dcol < 0){
 				dcol = -dcol;
-				diry = BACKWORD;
+				diry = BACKWARD;
 	}
-	else diry = FORWORD;
+	else diry = FORWARD;
 
 	move_n_cells(&(axis->x_stepper), drow,dirx);
 	move_n_cells(&(axis->y_stepper), dcol,diry);
 
 	// Move on the cell
-	move_half_cell(&(axis->x_stepper),BACKWORD);
+	move_half_cell(&(axis->x_stepper),BACKWARD);
 
 	// Set current position
 	axis->current_position.row = end_row;

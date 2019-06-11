@@ -47,8 +47,10 @@ typedef enum {
 } Step_direction;
 
 typedef struct Stepper{
-	uint16_t s.group_pin_direction;
-	GPIO_TypeDef* s.pin_direction;
+	uint16_t group_pin_direction;
+	GPIO_TypeDef* pin_direction;
+	uint16_t group_pin_step;
+	GPIO_TypeDef* pin_step;
 	uint16_t step_delay;
 }Stepper;
 

@@ -34,21 +34,19 @@ Axis_manager* axis_manager_init(TIM_HandleTypeDef *tim_pwm_handler,int frequency
 
 
 void axis_manager_reset_position(Axis_manager* axis){
-	setDirection(&(axis->x_stepper),0);
-	setDirection(&(axis->y_stepper),0);
 	SERVO_HOOK_off(&(axis->hook));
 
 	while(!axis_manager_check_limit(axis,1) && !axis_manager_check_limit(axis,0)){
-		move_half_cell(&(axis->x_stepper));
-		move_half_cell(&(axis->y_stepper));
+		move_half_cell(&(axis->x_stepper),BACKWORD);
+		move_half_cell(&(axis->y_stepper),BACKWORD);
 	}
 
 	while(!axis_manager_check_limit(axis,1)){
-			move_half_cell(&(axis->x_stepper));
+			move_half_cell(&(axis->x_stepper),BACKWORD);
 	}
 
 	while(!axis_manager_check_limit(axis,0)){
-			move_half_cell(&(axis->y_stepper));
+			move_half_cell(&(axis->y_stepper),BACKWORD);
 	}
 
 	axis->current_position.row = ORIGIN;
@@ -57,6 +55,7 @@ void axis_manager_reset_position(Axis_manager* axis){
 
 void axis_manager_move(Axis_manager* axis,int start_row,int start_column,int end_row,int end_column){
 	int drow,dcol;
+	Step_direction dirx,diry;
 
 	// Move the steppers to starting position
 	drow = start_row - axis->current_position.row;
@@ -64,25 +63,24 @@ void axis_manager_move(Axis_manager* axis,int start_row,int start_column,int end
 
 	if(drow < 0){
 		drow = -drow;
-		setDirection(&(axis->x_stepper),0);
+		dirx = BACKWORD;
 	}
-	else setDirection(&(axis->x_stepper),1);
+	else dirx = FORWORD;
 
 	if(dcol < 0){
 			dcol = -dcol;
-			setDirection(&(axis->y_stepper),0);
+			diry = BACKWORD;
 	}
-	else setDirection(&(axis->y_stepper),1);
+	else diry = FORWORD;
 
-	move_n_cells(&(axis->x_stepper), drow);
-	move_n_cells(&(axis->y_stepper), dcol);
+	move_n_cells(&(axis->x_stepper), drow,dirx);
+	move_n_cells(&(axis->y_stepper), dcol,diry);
 
 	// Active hook
 	SERVO_HOOK_on(&(axis->hook));
 
 	// Move on the boundary
-	setDirection(&(axis->x_stepper),1);
-	move_half_cell(&(axis->x_stepper));
+	move_half_cell(&(axis->x_stepper),FORWORD);
 
 	// Move the steppers to the end position
 	drow = end_row - start_row;
@@ -90,22 +88,21 @@ void axis_manager_move(Axis_manager* axis,int start_row,int start_column,int end
 
 	if(drow < 0){
 			drow = -drow;
-			setDirection(&(axis->x_stepper),0);
+			dirx = BACKWORD;
 	}
-	else setDirection(&(axis->x_stepper),1);
+	else dirx = FORWORD;
 
 	if(dcol < 0){
 				dcol = -dcol;
-				setDirection(&(axis->y_stepper),0);
+				diry = BACKWORD;
 	}
-	else setDirection(&(axis->y_stepper),1);
+	else diry = FORWORD;
 
-	move_n_cells(&(axis->x_stepper), drow);
-	move_n_cells(&(axis->y_stepper), dcol);
+	move_n_cells(&(axis->x_stepper), drow,dirx);
+	move_n_cells(&(axis->y_stepper), dcol,diry);
 
 	// Move on the cell
-	setDirection(&(axis->x_stepper),0);
-	move_half_cell(&(axis->x_stepper));
+	move_half_cell(&(axis->x_stepper),BACKWORD);
 
 	// Set current position
 	axis->current_position.row = end_row;

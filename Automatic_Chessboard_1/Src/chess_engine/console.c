@@ -279,6 +279,18 @@ void read_input( char block[BUFF_SIZE] )
         block[strlen (block) - 1] = '\0';
 }
 
+void settings_input_manager(){
+
+	// start command
+	/*if ( check_settings() )
+	{
+		start_game();
+	}
+	else print_message(WROND_BOARD_INITIALIZATION);*/
+
+	// set_user_color();
+}
+
 /** receives 'input'.
   * if input contains valid, setting phase, instructions;
   * executes them. 
@@ -445,12 +457,11 @@ void set_location( location l, int white, char piece )
 // Our adapter methods
 
 int player_input_game_manager(){
-	while(WHITE_TURN == PLAYER_WHITE); // il player deve passare il turno (interrupt input PIN);
-
 	// Read the grid and get the move
-	update_magnetic_grid(grid_manager);
-	move *m = fetch_moves(grid_manager);
+	/*update_magnetic_grid(grid_manager);
+	move *m = fetch_moves(grid_manager);*/
 
+	move *m = create_move(1,1,2,1);
 	location from;
 	from.row = m->from->row;
 	from.column = m->from->column;

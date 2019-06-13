@@ -31,6 +31,7 @@
 #include "chess_engine/Chess.h"
 #include "axis_manager_stm32f4/axis_manager.h"
 #include "magnetic_grid_interface_stm32/API_magneticGrid.h"
+#include "choice_stm32f4/scelta.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -52,8 +53,17 @@
 
 /* USER CODE BEGIN PV */
 int MINIMAX_DEPTH = 1;
-int GAME = 1;
-int SETTINGS = 0;
+
+enum status{
+	init=0,
+	player_control=1,
+	elaboration = 2,
+	choose_piece  = 3,
+	error = 4
+} current_status;
+
+int GAME = 0;
+int SETTINGS = 1;
 /** holds the current game state:
 	  *	0 - game isn't over
 	  * 1 - game is over with TIE
@@ -90,6 +100,9 @@ char board[BOARD_SIZE][BOARD_SIZE];
 char pretty_board[1000];
 Axis_manager* axis_manager;
 magnetic_grid_manager* grid_manager;
+menu_manager* menu_man;
+int menu_ch=0;
+int counter = 10;
 /* USER CODE END 0 */
 
 /**
@@ -101,6 +114,7 @@ int main(void)
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
+  
 
   /* MCU Configuration--------------------------------------------------------*/
 
@@ -128,11 +142,35 @@ int main(void)
   MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
 
+
 	axis_manager = axis_manager_init(&htim2,100,GPIOB,GPIO_PIN_1,GPIOC,GPIO_PIN_8,3,GPIOB,GPIO_PIN_2,GPIOC,GPIO_PIN_5,3,GPIOB,GPIO_PIN_13,GPIOB,GPIO_PIN_14);
 	grid_manager = init_magnetic_grid();
+	menu_man = menu_manager_init(hadc1);
 
+	HAL_ADC_Start_DMA(&hadc1,menu_man->raw_values,2);
 
-    init_board(board);
+	char tmp[MAXCHAR];
+	char color_choice[2][MAXCHAR];
+	strcpy(color_choice[0],"BLACK\0");
+	strcpy(color_choice[1],"WHITE\0");
+	char start_choice[1][MAXCHAR];
+	strcpy(start_choice[0],"Press to Start\0");
+	char piece_choice[4][MAXCHAR];
+	strcpy(piece_choice[0],"QUEEN\0");
+	strcpy(piece_choice[1],"KNIGHT\0");
+	strcpy(piece_choice[2],"BISHOP\0");
+	strcpy(piece_choice[3],"ROOK\0");
+	int piece_ch = 0;
+
+	createMenu(menu_man,"Choose color\0",color_choice,2,&PLAYER_WHITE);
+	createMenu(menu_man,"Are you ready?\0",start_choice,1,NULL);
+	createMenu(menu_man,"Piece Choose\0",piece_choice,4,&piece_ch);
+
+	current_status = init;
+	enum status prev_stat = init;
+	init_board(board);
+
+    show_menu(menu_man,0,0);
 
   //print_board(board,pretty_board); //prints only if in console mode
   /* USER CODE END 2 */
@@ -141,48 +179,95 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	/* USER CODE END WHILE*/
-	  if ( (SETTINGS) || (TWO_PLAYERS_MODE) || (WHITE_TURN&&PLAYER_WHITE) || ((!WHITE_TURN)&&(!PLAYER_WHITE)) )
-	    	  	    		{
-	    	  	    			if ( GAME && (GAME_STATUS = game_over(board)) ) GAME = 0;
-	    	  	    			if( !GAME && !SETTINGS ) // end the game
-	    	  	    			{
-	    	  	    				declare_winner();
-	    	  	    				quit();
-	    	  	    			}
-	    	  	    			//if( GAME && !repeat && is_check(board, WHITE_TURN)) print_message(CHECK)
-	    	  	    			//if ( GAME )	print_message(ENTER_MOVE(WHITE_TURN));
-	    	  	    			//if ( SETTINGS ) print_message(ENTER_SETTINGS);
-	    	  	    			//read_input(input);
-	    	  	    			//if( strcmp(input,"") == 0 ) continue; // verify input isn't empty.
-	    	  	    			//if ( strcmp(input, "quit") == 0 ) quit();
-	    	  	    		}
-	    	  	    		if ( SETTINGS )
-	    	  	    		{
-	    	  	    			//parse_input_settings(input);
-	    	  	    			DO_DEBUG
-	    	  	    			(
-	    	  	    				printf("user color is: %d\n", PLAYER_WHITE);
-	    	  	    				printf("minmax depth is: %d\n", MINIMAX_DEPTH);
-	    	  	    				printf("next player is: %d\n", WHITE_TURN);
-	    	  	    				printf("game mode is: %d\n", TWO_PLAYERS_MODE);
-	    	  	    			)
-	    	  	    		}
-	    	  	    		else if ( GAME )
-	    	  	    		{
+    /* USER CODE END WHILE */
 
-	    	  	    			if ( (TWO_PLAYERS_MODE) || (WHITE_TURN&&PLAYER_WHITE) || ((!WHITE_TURN)&&(!PLAYER_WHITE)) ) //user's turn
-	    	  	    			{
-	    	  	    				if(player_input_game_manager() == 0 ) //'1' if user's input was wrong in some way or need another input
-	    	  	    					WHITE_TURN = (WHITE_TURN + 1)%2;
-	    	  	    				//ANTONIO Mossa fatta dall'utente
-	    	  	    			}
-	    	  	    			else play_computer_turn(board); //computer's turn
-
-	    	  	    			print_board(board,pretty_board);
-	    	  	    			// WHITE_TURN = (WHITE_TURN + 1)%2;
-	    	  	    		}
     /* USER CODE BEGIN 3 */
+	  if(prev_stat != current_status){
+	  		  lcd_clear();
+	  		  HAL_Delay(10);
+	  		  prev_stat = current_status;
+	  }
+	  /* if ( (SETTINGS) || (TWO_PLAYERS_MODE) || (WHITE_TURN&&PLAYER_WHITE) || ((!WHITE_TURN)&&(!PLAYER_WHITE)) )
+	  	    	  	    		{
+	  	    	  	    			if ( GAME && (GAME_STATUS = game_over(board)) ) GAME = 0;
+	  	    	  	    			if( !GAME && !SETTINGS ) // end the game
+	  	    	  	    			{
+	  	    	  	    				declare_winner();
+	  	    	  	    				quit();
+	  	    	  	    			}
+	  	    	  	    			//if( GAME && !repeat && is_check(board, WHITE_TURN)) print_message(CHECK)
+	  	    	  	    			//if ( GAME )	print_message(ENTER_MOVE(WHITE_TURN));
+	  	    	  	    			//if ( SETTINGS ) print_message(ENTER_SETTINGS);
+	  	    	  	    			//read_input(input);
+	  	    	  	    			//if( strcmp(input,"") == 0 ) continue; // verify input isn't empty.
+	  	    	  	    			//if ( strcmp(input, "quit") == 0 ) quit();
+	  	    	  	    		}*/
+	if ( current_status == init )
+	{
+		DO_DEBUG
+		(
+			printf("user color is: %d\n", PLAYER_WHITE);
+			printf("minmax depth is: %d\n", MINIMAX_DEPTH);
+			printf("next player is: %d\n", WHITE_TURN);
+			printf("game mode is: %d\n", TWO_PLAYERS_MODE);
+		)
+		if(menu_ch){
+			next_menu(menu_man);
+			menu_ch = 0;
+		}
+		else change_menu(menu_man);
+		change_choice(menu_man);
+	}
+	else if ( current_status == player_control )
+	{
+		lcd_send_string ("Player turn\0", 1);
+		HAL_Delay(10);
+
+		/*if ( (TWO_PLAYERS_MODE) || (WHITE_TURN&&PLAYER_WHITE) || ((!WHITE_TURN)&&(!PLAYER_WHITE)) ) //user's turn
+		{
+			if(player_input_game_manager() == 0 ) //'1' if user's input was wrong in some way or need another input
+				WHITE_TURN = (WHITE_TURN + 1)%2;
+			//ANTONIO Mossa fatta dall'utente
+		}
+		else play_computer_turn(board); *///computer's turn
+
+		// print_board(board,pretty_board);
+		// WHITE_TURN = (WHITE_TURN + 1)%2;
+	}
+	else if(current_status == elaboration){
+		lcd_send_string ("Elaboration\0", 1);
+		HAL_Delay(10);
+		play_computer_turn(board);
+
+		if ( GAME && (GAME_STATUS = game_over(board)) ) GAME = 0;
+		if( !GAME && !SETTINGS ) // end the game
+		{
+			declare_winner();
+			quit();
+		}
+		if( GAME && is_check(board, WHITE_TURN)) print_message(CHECK)
+		if ( GAME )	print_message(ENTER_MOVE(WHITE_TURN));
+		if ( SETTINGS ) print_message(ENTER_SETTINGS);
+
+		// If not problem else error o choose piece o init (fine gioco)
+		current_status = player_control;
+		WHITE_TURN = (WHITE_TURN + 1)%2;
+		//show_menu(menu_man,2,0); // if(current_status == choose_piece)
+	}
+	else if(current_status == choose_piece){
+		change_choice(menu_man);
+	}
+	else if(current_status == error){
+		sprintf(tmp,"%d",counter);
+		lcd_send_string ("Error\0", 1);
+		lcd_send_string (tmp, 2);
+		HAL_Delay(10);
+
+		if(counter == 0){
+			current_status = init;
+		}
+	}
+
   }
   /* USER CODE END 3 */
 }
@@ -226,7 +311,47 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+// Button interrupt management, switch state
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 
+	if(GPIO_Pin == GPIO_PIN_1 && current_status != elaboration){
+		enum status next_state = current_status;
+		switch(current_status){
+			case init:
+				if(menu_man->current_menu == 1){
+					next_state = (PLAYER_WHITE == 1)? player_control:elaboration;
+					SETTINGS = 0;
+					GAME = 1;
+				}
+				else menu_ch = 1;
+				break;
+			case player_control:
+				if(player_input_game_manager() == 0){
+					next_state = elaboration;
+					WHITE_TURN = (WHITE_TURN + 1)%2;
+				}
+				else {
+					next_state = error;
+					HAL_TIM_Base_Start_IT(&htim3);
+				}
+				break;
+			case choose_piece:
+				// make promote, go error or player_control
+				break;
+			case error:
+				HAL_TIM_Base_Stop_IT(&htim3);
+				current_status = player_control; // See better
+				break;
+		}
+		current_status = next_state;
+	}
+}
+
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+		counter --;
+		//HAL_TIM_Base_Start_IT(htim);
+}
 /* USER CODE END 4 */
 
 /**

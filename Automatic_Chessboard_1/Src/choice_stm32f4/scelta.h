@@ -11,19 +11,39 @@
 #include "String.h"
 #include "../lcd_interface_stm32f4/i2c-lcd.h"
 
+#define MAXCHAR 16
+#define MAXMENU 4
+#define MAXCHOICE 4
 
-/*typedef struct SCELTA{
-	int nbOfScreen;
-	char op_msg1[16];
-	char op_msg2[16];
-}SCELTA;*/
+typedef struct menu{
+	char title[MAXCHAR];
+	int *variable;
+	int chioces_len;
+	char choices[MAXCHOICE][MAXCHAR];
+}menu;
+
+typedef struct menu_manager{
+	ADC_HandleTypeDef handle;
+	menu* menus[MAXMENU];
+	int menu_len;
+	uint32_t raw_values[2];
+	int center_y;
+	int center_x;
+
+	int current_menu;
+	int current_choice;
+}menu_manager;
 
 
-//SCELTA scelta_Init(int n, char msgA[], char msgB[]);
+menu_manager* menu_manager_init(ADC_HandleTypeDef handle);
 
-int createMenu(char* screen[], int cont, float y, int n);
+int createMenu(menu_manager* manager,char title[],char chioces[][MAXCHAR], int choice_len, int *var);
 
-void choose(int cont, char screen[]);
+void change_choice(menu_manager* manager);
+void change_menu(menu_manager* manager);
+void next_menu(menu_manager* manager);
+
+void show_menu(menu_manager* manager,int choice_menu,int choice);
 
 
 #endif /* SCELTA_H_ */

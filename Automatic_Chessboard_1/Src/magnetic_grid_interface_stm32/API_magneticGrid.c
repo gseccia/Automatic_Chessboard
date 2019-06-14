@@ -35,14 +35,14 @@ void update_magnetic_grid(magnetic_grid_manager* magnetic_grid_manager){
 		HAL_Delay(100);
 					  //now i read each row
 
-		(magnetic_grid_manager->magnetic_grid)[0][0] = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_8);  // row 1 - black
-		(magnetic_grid_manager->magnetic_grid)[1][0] = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_9);  // row 2 - white
-		(magnetic_grid_manager->magnetic_grid)[2][0] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5);  // row 3 - gray
-		(magnetic_grid_manager->magnetic_grid)[3][0] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6);  // row 4 - violet
-		(magnetic_grid_manager->magnetic_grid)[4][0] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7);  // row 5- blue
-		(magnetic_grid_manager->magnetic_grid)[5][0] = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_6);  // row 6- green
-		(magnetic_grid_manager->magnetic_grid)[6][0] = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_7);  // row 7- yellow
-		(magnetic_grid_manager->magnetic_grid)[7][0] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_9);  // row 8 - orange
+		(magnetic_grid_manager->magnetic_grid)[0][i] = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_8);  // row 1 - black
+		(magnetic_grid_manager->magnetic_grid)[1][i] = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_9);  // row 2 - white
+		(magnetic_grid_manager->magnetic_grid)[2][i] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5);  // row 3 - gray
+		(magnetic_grid_manager->magnetic_grid)[3][i] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6);  // row 4 - violet
+		(magnetic_grid_manager->magnetic_grid)[4][i] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7);  // row 5- blue
+		(magnetic_grid_manager->magnetic_grid)[5][i] = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_6);  // row 6- green
+		(magnetic_grid_manager->magnetic_grid)[6][i] = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_7);  // row 7- yellow
+		(magnetic_grid_manager->magnetic_grid)[7][i] = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_9);  // row 8 - orange
 
 		HAL_Delay(100);
 	    HAL_GPIO_WritePin(str_pins[i], pins[i], RESET);

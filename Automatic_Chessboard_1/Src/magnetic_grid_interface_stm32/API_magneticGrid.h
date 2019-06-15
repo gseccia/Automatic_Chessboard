@@ -8,13 +8,14 @@
 #ifndef SRC_API_MAGNETICGRID_H_
 #define SRC_API_MAGNETICGRID_H_
 
-/** @brief  fetch the magnetic grid and build a mapping-matrix of the chess-men on the chess-board
-  * @param  the matrix to fill
-  * @retval None
-  */
+
 #include "../chess_engine/Chess.h"
 #include "gpio.h"
 #include <stdlib.h>
+
+/**
+  * @brief It contains two mapping matrix of the chess-men on the chess-board, one for the current state and one for the previous state
+  */
 
 typedef struct magnetic_grid_manager{
 	uint8_t magnetic_grid[8][8];
@@ -22,11 +23,38 @@ typedef struct magnetic_grid_manager{
 } magnetic_grid_manager;
 
 
+/** @brief  It creates a “magnetic_grid_manager” instance and initialize all the element of the matrix “magnetic_grid” to zero.
+  * @retval The pointer to the magnetic_grid_manager built
+  */
+
 magnetic_grid_manager* init_magnetic_grid();
 
+/** @brief  fetch the magnetic grid and build a mapping-matrix of the chess-men on the chess-board
+  * @param  the magnetic_grid_manager that manages the mapping matrix of the chess-men on the chess-board
+  * @retval None
+  */
+
 void read_magnetic_grid(magnetic_grid_manager* magnetic_grid_manager);
+
+/** @brief  It update “magnetic_grid_manager” putting the current state of the magnetic grid in “Magnetic_grid”, but first bring the content of “magnetic_grid” in “old_magnetic_grid” to preserve the value of the previous state.
+  * @param  the the magnetic_grid_manager that manages the mapping matrix of the chess-men on the chess-board
+  * @retval None
+  */
+
 void update_magnetic_grid(magnetic_grid_manager* magnetic_grid_manager);
+
+/** @brief  It reset “magnetic_grid_manager”
+  * @param  the the magnetic_grid_manager that manages the mapping matrix of the chess-men on the chess-board
+  * @retval None
+  */
+
 void reset_magnetic_grid(magnetic_grid_manager* magnetic_manager);
+
+/** @brief  It extract the move done by the user looking at the differences between the current state and the old state of the magnetic grid
+  * @param  the the magnetic_grid_manager that manages the mapping matrix of the chess-men on the chess-board
+  * @retval The move done by the user
+  */
+
 move* fetch_moves(magnetic_grid_manager* magnetic_grid_manager);
 
 

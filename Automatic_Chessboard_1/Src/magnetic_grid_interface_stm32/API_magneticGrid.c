@@ -36,10 +36,7 @@ void update_magnetic_grid(magnetic_grid_manager* magnetic_grid_manager){
 	}
 }
 
-/** @brief  fetch the magnetic grid and build a mapping-matrix of the chess-men on the chess-board
-  * @param  the matrix to fill
-  * @retval None
-  */
+
 void read_magnetic_grid(magnetic_grid_manager* magnetic_grid_manager){
 
 	int i,j;

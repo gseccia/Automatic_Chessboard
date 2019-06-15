@@ -24,8 +24,9 @@ typedef struct magnetic_grid_manager{
 
 magnetic_grid_manager* init_magnetic_grid();
 
+void read_magnetic_grid(magnetic_grid_manager* magnetic_grid_manager);
 void update_magnetic_grid(magnetic_grid_manager* magnetic_grid_manager);
-
+void reset_magnetic_grid(magnetic_grid_manager* magnetic_manager);
 move* fetch_moves(magnetic_grid_manager* magnetic_grid_manager);
 
 

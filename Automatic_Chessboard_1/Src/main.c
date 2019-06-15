@@ -59,7 +59,8 @@ enum status{
 	player_control=1,
 	elaboration = 2,
 	choose_piece  = 3,
-	error = 4
+	error = 4,
+	end_game = 5
 } current_status;
 
 int GAME = 0;
@@ -78,7 +79,7 @@ int GAME_STATUS = 0;
 	int WHITE_TURN = 1;
 /** 1 - player is white
 	  * 0 - player is black */
-	int PLAYER_WHITE = 1;
+	int PLAYER_WHITE = 0;
 /** the board */
 
 //----Game settings----//
@@ -98,6 +99,8 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN 0 */
 char board[BOARD_SIZE][BOARD_SIZE];
 char pretty_board[1000];
+char error_message[16];
+char end_message[16];
 Axis_manager* axis_manager;
 magnetic_grid_manager* grid_manager;
 menu_manager* menu_man;
@@ -149,6 +152,7 @@ int main(void)
 
 	HAL_ADC_Start_DMA(&hadc1,menu_man->raw_values,2);
 
+	char info_message[16] = "";
 	char tmp[MAXCHAR];
 	char color_choice[2][MAXCHAR];
 	strcpy(color_choice[0],"BLACK\0");
@@ -162,9 +166,9 @@ int main(void)
 	strcpy(piece_choice[3],"ROOK\0");
 	int piece_ch = 0;
 
-	createMenu(menu_man,"Choose color\0",color_choice,2,&PLAYER_WHITE);
-	createMenu(menu_man,"Are you ready?\0",start_choice,1,NULL);
-	createMenu(menu_man,"Piece Choose\0",piece_choice,4,&piece_ch);
+	createMenu(menu_man,"Choose color\0",color_choice,2,&PLAYER_WHITE,1);
+	createMenu(menu_man,"Are you ready?\0",start_choice,1,NULL,1);
+	createMenu(menu_man,"Piece Choose\0",piece_choice,4,&piece_ch,0);
 
 	current_status = init;
 	enum status prev_stat = init;
@@ -186,22 +190,13 @@ int main(void)
 	  		  lcd_clear();
 	  		  HAL_Delay(10);
 	  		  prev_stat = current_status;
+	  		  if(current_status == init){
+	  			  show_menu(menu_man,0,0);
+	  			  reset_magnetic_grid(grid_manager);
+	  		  }
+	  		  else if(current_status == choose_piece) show_menu(menu_man,2,0);
 	  }
-	  /* if ( (SETTINGS) || (TWO_PLAYERS_MODE) || (WHITE_TURN&&PLAYER_WHITE) || ((!WHITE_TURN)&&(!PLAYER_WHITE)) )
-	  	    	  	    		{
-	  	    	  	    			if ( GAME && (GAME_STATUS = game_over(board)) ) GAME = 0;
-	  	    	  	    			if( !GAME && !SETTINGS ) // end the game
-	  	    	  	    			{
-	  	    	  	    				declare_winner();
-	  	    	  	    				quit();
-	  	    	  	    			}
-	  	    	  	    			//if( GAME && !repeat && is_check(board, WHITE_TURN)) print_message(CHECK)
-	  	    	  	    			//if ( GAME )	print_message(ENTER_MOVE(WHITE_TURN));
-	  	    	  	    			//if ( SETTINGS ) print_message(ENTER_SETTINGS);
-	  	    	  	    			//read_input(input);
-	  	    	  	    			//if( strcmp(input,"") == 0 ) continue; // verify input isn't empty.
-	  	    	  	    			//if ( strcmp(input, "quit") == 0 ) quit();
-	  	    	  	    		}*/
+
 	if ( current_status == init )
 	{
 		DO_DEBUG
@@ -221,51 +216,52 @@ int main(void)
 	else if ( current_status == player_control )
 	{
 		lcd_send_string ("Player turn\0", 1);
+		lcd_send_string (info_message, 2);
+
 		HAL_Delay(10);
-
-		/*if ( (TWO_PLAYERS_MODE) || (WHITE_TURN&&PLAYER_WHITE) || ((!WHITE_TURN)&&(!PLAYER_WHITE)) ) //user's turn
-		{
-			if(player_input_game_manager() == 0 ) //'1' if user's input was wrong in some way or need another input
-				WHITE_TURN = (WHITE_TURN + 1)%2;
-			//ANTONIO Mossa fatta dall'utente
-		}
-		else play_computer_turn(board); *///computer's turn
-
-		// print_board(board,pretty_board);
-		// WHITE_TURN = (WHITE_TURN + 1)%2;
 	}
 	else if(current_status == elaboration){
 		lcd_send_string ("Elaboration\0", 1);
 		HAL_Delay(10);
 		play_computer_turn(board);
 
-		if ( GAME && (GAME_STATUS = game_over(board)) ) GAME = 0;
+		if ( GAME && (GAME_STATUS = game_over(board)) ) {
+			GAME = 0;
+		}
 		if( !GAME && !SETTINGS ) // end the game
 		{
-			declare_winner();
-			quit();
+			// declare_winner();
+			if(GAME_STATUS == 1) strcpy(end_message,"Tie match");
+			else if(GAME_STATUS == 2) strcpy(end_message,"White wins");
+			else if(GAME_STATUS == 3) strcpy(end_message,"Black wins");
+			current_status = end_game;
 		}
-		if( GAME && is_check(board, WHITE_TURN)) print_message(CHECK)
-		if ( GAME )	print_message(ENTER_MOVE(WHITE_TURN));
-		if ( SETTINGS ) print_message(ENTER_SETTINGS);
+		if( GAME && is_check(board, WHITE_TURN)) strcpy(info_message,"CHECK");
+		else strcpy(info_message,"");
 
-		// If not problem else error o choose piece o init (fine gioco)
 		current_status = player_control;
 		WHITE_TURN = (WHITE_TURN + 1)%2;
-		//show_menu(menu_man,2,0); // if(current_status == choose_piece)
+
 	}
 	else if(current_status == choose_piece){
 		change_choice(menu_man);
 	}
 	else if(current_status == error){
-		sprintf(tmp,"%d",counter);
-		lcd_send_string ("Error\0", 1);
+		sprintf(tmp,"%2d",counter);
+		lcd_send_string (error_message, 1);
 		lcd_send_string (tmp, 2);
 		HAL_Delay(10);
 
-		if(counter == 0){
-			current_status = init;
+		if(counter <= 0){
+			current_status = end_game;
+			strcpy(end_message,"You lose\0");
+		    HAL_TIM_Base_Stop_IT(&htim3);
 		}
+	}
+	else if(current_status == end_game){
+		lcd_send_string (end_message, 1);
+		lcd_send_string ("Press to restart", 2);
+		HAL_Delay(10);
 	}
 
   }
@@ -319,9 +315,14 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 		switch(current_status){
 			case init:
 				if(menu_man->current_menu == 1){
-					next_state = (PLAYER_WHITE == 1)? player_control:elaboration;
-					SETTINGS = 0;
-					GAME = 1;
+					if(settings_input_manager() == -1){
+						next_state = init;
+					}
+					else{
+						next_state = (PLAYER_WHITE == 1)? player_control:elaboration;
+						set_invalid_menu(menu_man,0);
+						set_invalid_menu(menu_man,1);
+					}
 				}
 				else menu_ch = 1;
 				break;
@@ -329,6 +330,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 				if(player_input_game_manager() == 0){
 					next_state = elaboration;
 					WHITE_TURN = (WHITE_TURN + 1)%2;
+					 // if(current_status == choose_piece)
 				}
 				else {
 					next_state = error;
@@ -336,11 +338,23 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 				}
 				break;
 			case choose_piece:
+				set_invalid_menu(menu_man,2);
 				// make promote, go error or player_control
 				break;
 			case error:
 				HAL_TIM_Base_Stop_IT(&htim3);
-				current_status = player_control; // See better
+				counter = 10;
+				next_state = player_control;
+				break;
+			case end_game:
+				next_state = init;
+
+				set_valid_menu(menu_man,0);
+				set_valid_menu(menu_man,1);
+
+				init_board(board);
+			    counter = 10;
+
 				break;
 		}
 		current_status = next_state;
@@ -349,8 +363,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-		counter --;
-		//HAL_TIM_Base_Start_IT(htim);
+		if(htim == &htim3)counter --;
+		else {
+			HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+			HAL_TIM_Base_Stop_IT(htim);
+		}
 }
 /* USER CODE END 4 */
 

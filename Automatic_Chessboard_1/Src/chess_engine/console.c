@@ -12,6 +12,7 @@
 //ANTONIO LIBRERIA DISPLAY DA AGGIUNGERE
 extern Axis_manager* axis_manager;
 extern struct magnetic_grid_manager* grid_manager;
+extern char error_message[16];
 
 // Genral settings
 extern int MINIMAX_DEPTH;
@@ -279,16 +280,16 @@ void read_input( char block[BUFF_SIZE] )
         block[strlen (block) - 1] = '\0';
 }
 
-void settings_input_manager(){
+int settings_input_manager(){
 
 	// start command
-	/*if ( check_settings() )
+	if ( check_settings() )
 	{
 		start_game();
+		return 0;
 	}
-	else print_message(WROND_BOARD_INITIALIZATION);*/
-
-	// set_user_color();
+	strcpy(error_message,WROND_BOARD_INITIALIZATION);//print_message(WROND_BOARD_INITIALIZATION);
+	return -1;
 }
 
 /** receives 'input'.
@@ -458,28 +459,40 @@ void set_location( location l, int white, char piece )
 
 int player_input_game_manager(){
 	// Read the grid and get the move
-	/*update_magnetic_grid(grid_manager);
-	move *m = fetch_moves(grid_manager);*/
 
-	move *m = create_move(1,1,2,1);
+	// read_magnetic_grid(grid_manager);
+
+	(grid_manager->magnetic_grid)[1][1] = 0;
+	(grid_manager->magnetic_grid)[2][1] = 1;
+
+	move *m = fetch_moves(grid_manager);
+
 	location from;
-	from.row = m->from->row;
-	from.column = m->from->column;
-
 	location to;
-	to.row = m->to->row;
-	to.column = m->to->column;
+
+	if(m == NULL){
+		from.row = -1;
+		from.column = -1;
+	}
+	else{
+		from.row = m->from->row;
+		from.column = m->from->column;
+
+		to.row = m->to->row;
+		to.column = m->to->column;
+	}
 
 	if ( !is_legal_location(from) || !is_legal_location(to))
 	{
-				print_message(WRONG_POSITION);
+				strcpy(error_message,"Illegal position");//print_message(WRONG_POSITION);
 				free_move(m);
 				//ANTONIO Mossa Errata e ripristino
 				return 1; // repeat
 	}
 	else if ( (WHITE_TURN && !IS_WHITE(board[from.column][from.row])) || (!WHITE_TURN && !IS_BLACK(board[from.column][from.row])))
 	{
-				print_message(NOT_YOUR_PIECE);
+				strcpy(error_message,"Illegal piece");
+				// print_message(NOT_YOUR_PIECE);
 				free_move(m);
 				return 1; // repeat
 	}
@@ -493,16 +506,17 @@ int player_input_game_manager(){
 	if ( !is_legal_move(m) )
 	{
 				free_move(m);
-				print_message(ILLEGAL_MOVE);
+				strcpy(error_message,"Illegal move");//print_message(ILLEGAL_MOVE);
 				//ANTONIO Mossa Errata e ripristino
 				return 1; // repeat
 	}
 	else
 	{
 				DO_DEBUG(print_message("move: move is legal checked \n"); fflush(stdout);)
+				update_magnetic_grid(grid_manager);
 				do_move(board, m);
 				free_move(m);
-				print_board(board,pretty_board);
+				// print_board(board,pretty_board);
 				return 0;
 			// check for tie / mate / check !! ???
 	}

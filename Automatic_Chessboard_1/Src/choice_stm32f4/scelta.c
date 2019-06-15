@@ -27,7 +27,7 @@ menu_manager* menu_manager_init(ADC_HandleTypeDef handle){
 }
 
 
-int createMenu(menu_manager* manager,char title[],char chioces[][MAXCHAR], int choice_len,int* var){
+int createMenu(menu_manager* manager,char title[],char chioces[][MAXCHAR], int choice_len,int* var,int valid){
 	if(manager->menu_len < MAXMENU && choice_len >= 1){
 		(manager->menus)[manager->menu_len] = (menu*)malloc(sizeof(menu));
 		int i;
@@ -37,11 +37,24 @@ int createMenu(menu_manager* manager,char title[],char chioces[][MAXCHAR], int c
 			strcpy(((manager->menus)[manager->menu_len]->choices)[i],chioces[i]);
 		(manager->menus)[manager->menu_len]->chioces_len=choice_len;
 		(manager->menus)[manager->menu_len]->variable=var;
+		(manager->menus)[manager->menu_len]->valid=valid;
 
 		manager->menu_len++;
 		return 0;
 	}
 	else return -1;
+}
+
+void set_invalid_menu(menu_manager* manager,int choice){
+	(manager->menus)[choice]->valid = 0;
+}
+
+void set_valid_menu(menu_manager* manager,int choice){
+	(manager->menus)[choice]->valid = 1;
+}
+
+int is_legal_menu(menu_manager* manager,int choice_menu){
+	return (manager->menus)[choice_menu]->valid;
 }
 
 void show_menu(menu_manager* manager,int choice_menu,int choice){
@@ -50,7 +63,7 @@ void show_menu(menu_manager* manager,int choice_menu,int choice){
 		lcd_send_string("Error",1);
 		lcd_send_string("Invalid choice",2);
 	}
-	else{
+	else if(is_legal_menu(manager,choice_menu)){
 		lcd_clear();
 		lcd_send_string((manager->menus)[choice_menu]->title,1);
 		lcd_send_string(((manager->menus)[choice_menu]->choices)[choice],2);
@@ -61,7 +74,6 @@ void show_menu(menu_manager* manager,int choice_menu,int choice){
 
 	HAL_Delay(10);
 }
-
 
 void change_choice(menu_manager* manager){
 	uint32_t y;
@@ -112,7 +124,6 @@ void change_menu(menu_manager* manager){
 
 void next_menu(menu_manager* manager){
 	show_menu(manager,manager->current_menu+1,0);
-	HAL_Delay(10);
 }
 
 

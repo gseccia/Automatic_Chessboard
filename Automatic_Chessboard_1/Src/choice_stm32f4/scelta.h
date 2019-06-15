@@ -19,6 +19,7 @@ typedef struct menu{
 	char title[MAXCHAR];
 	int *variable;
 	int chioces_len;
+	int valid;
 	char choices[MAXCHOICE][MAXCHAR];
 }menu;
 
@@ -37,7 +38,9 @@ typedef struct menu_manager{
 
 menu_manager* menu_manager_init(ADC_HandleTypeDef handle);
 
-int createMenu(menu_manager* manager,char title[],char chioces[][MAXCHAR], int choice_len, int *var);
+int createMenu(menu_manager* manager,char title[],char chioces[][MAXCHAR], int choice_len, int *var,int valid);
+void set_invalid_menu(menu_manager* manager,int choice);
+void set_valid_menu(menu_manager* manager,int choice);
 
 void change_choice(menu_manager* manager);
 void change_menu(menu_manager* manager);

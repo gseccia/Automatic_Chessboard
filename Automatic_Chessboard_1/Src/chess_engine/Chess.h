@@ -102,7 +102,8 @@ typedef struct button_st button;
 	//----console functions----//
 
 int player_input_game_manager();
-void settings_input_manager();
+int settings_input_manager();
+void print_error_lcd(char* str);
 
 void print_board( char board[BOARD_SIZE][BOARD_SIZE],char pretty_board[]);
 void init_board( char board[BOARD_SIZE][BOARD_SIZE] );

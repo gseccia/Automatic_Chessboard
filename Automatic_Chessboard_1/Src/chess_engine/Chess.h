@@ -3,19 +3,19 @@
 
 #include<stdio.h>
 
-#define WHITE_P 'm'
-#define WHITE_B 'b'
-#define WHITE_N 'n'
-#define WHITE_R 'r'
-#define WHITE_Q 'q'
-#define WHITE_K 'k'
+#define WHITE_P 'm'      //white pedestrian
+#define WHITE_B 'b'      //white bishop
+#define WHITE_N 'n'      //white knight (horse)
+#define WHITE_R 'r'      //white rook
+#define WHITE_Q 'q'      //white queen
+#define WHITE_K 'k'      //white king
 
-#define BLACK_P 'M'
-#define BLACK_B 'B'
-#define BLACK_N 'N'
-#define BLACK_R 'R'
-#define BLACK_Q 'Q'
-#define BLACK_K 'K'
+#define BLACK_P 'M'      //black pedestrian
+#define BLACK_B 'B'      //black bishop
+#define BLACK_N 'N'      //black knight (horse)
+#define BLACK_R 'R'      //black rook
+#define BLACK_Q 'Q'      //black queen
+#define BLACK_K 'K'      //black king
 
 #define WIN_SCORE 200
 #define LOOSE_SCORE -200

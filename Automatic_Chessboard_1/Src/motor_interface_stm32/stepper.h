@@ -41,10 +41,20 @@
 
 #include "gpio.h"
 
+/**
+  * @brief This enumeration represent the directions of movement of the motor.
+  */
+
 typedef enum {
 	FORWARD  		= 1,
 	BACKWARD        = -1,
 } Step_direction;
+
+/**
+  * @brief The struct “Stepper” represent the step motor.
+  * To control it we need to know which are the two  GPIO pins of the Board that allow us to set the direction and make a step;
+  * the step delay is used to set the delay between two successive steps, so the speed of the motor.
+  */
 
 typedef struct Stepper{
 	GPIO_TypeDef* group_pin_direction;
@@ -61,7 +71,7 @@ Stepper stepper_init(GPIO_TypeDef* group_pin_direction, uint16_t pin_direction, 
 // direction setter methood:
 void setDirection(Stepper* stepper,Step_direction new_direction);
 
-
+// motion metods:
 void move_n_steps(Stepper* stepper, int number_of_steps, Step_direction direction);
 
 void move_half_cell(Stepper* stepper, Step_direction direction);

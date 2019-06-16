@@ -141,6 +141,7 @@ move *get_q_moves(char a_board[BOARD_SIZE][BOARD_SIZE], location *from);
 move *get_k_moves(char a_board[BOARD_SIZE][BOARD_SIZE], location *from);
 move *link_moves(move *m1, move *m2);
 void do_move(char a_board[BOARD_SIZE][BOARD_SIZE], move *user_move);
+void perform_move(char a_board[BOARD_SIZE][BOARD_SIZE], move *user_move);
 int is_check(char a_board[BOARD_SIZE][BOARD_SIZE], int color);
 char piece_name_to_char(move *m, char *name);
 void print_all_moves(move *m);

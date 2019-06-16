@@ -457,13 +457,19 @@ void set_location( location l, int white, char piece )
 
 // Our adapter methods
 
+void perform_move(char a_board[BOARD_SIZE][BOARD_SIZE], move *user_move){
+	do_move(a_board,user_move);
+	//Mossa sulla scacchiera reale
+	int empty = a_board[user_move->to->column][user_move->to->row] == EMPTY;
+	if(!empty) axis_manager_move(axis_manager,user_move->to->row,user_move->to->column,OUT_CHESSBOARD,OUT_CHESSBOARD);
+	axis_manager_move(axis_manager,user_move->from->row,user_move->from->column,user_move->to->row,user_move->to->column);
+}
+
 int player_input_game_manager(){
 	// Read the grid and get the move
 
-	// read_magnetic_grid(grid_manager);
-
-	(grid_manager->magnetic_grid)[1][1] = 0;
-	(grid_manager->magnetic_grid)[2][1] = 1;
+	/*(grid_manager->magnetic_grid)[1][1] = 0;
+	(grid_manager->magnetic_grid)[2][1] = 1;*/
 
 	move *m = fetch_moves(grid_manager);
 
@@ -484,7 +490,7 @@ int player_input_game_manager(){
 
 	if ( !is_legal_location(from) || !is_legal_location(to))
 	{
-				strcpy(error_message,"Illegal position");//print_message(WRONG_POSITION);
+				strcpy(error_message,"Illegal pos");//print_message(WRONG_POSITION);
 				free_move(m);
 				//ANTONIO Mossa Errata e ripristino
 				return 1; // repeat
@@ -513,7 +519,8 @@ int player_input_game_manager(){
 	else
 	{
 				DO_DEBUG(print_message("move: move is legal checked \n"); fflush(stdout);)
-				update_magnetic_grid(grid_manager);
+				update_magnetic_grid(grid_manager); //Update status
+
 				do_move(board, m);
 				free_move(m);
 				// print_board(board,pretty_board);
@@ -1363,11 +1370,6 @@ void do_move(char a_board[BOARD_SIZE][BOARD_SIZE], move *user_move)
 	a_board[user_move->to->column][user_move->to->row] = ((piece == BLACK_P) || (piece == WHITE_P)) && (user_move->promote != EMPTY) ?
 														user_move->promote : piece; //promote if needed (promote != EMPTY)
 
-	//ANTONIO Fare la mossa sulla scacchiera reale
-
-	if(!empty) axis_manager_move(axis_manager,user_move->to->row,user_move->to->column,OUT_CHESSBOARD,OUT_CHESSBOARD);
-	axis_manager_move(axis_manager,user_move->from->row,user_move->from->column,user_move->to->row,user_move->to->column);
-
 }
 
 /** prints move 'm' in the requested format.
@@ -1808,7 +1810,7 @@ void declare_winner(void)
 void play_computer_turn(char board[BOARD_SIZE][BOARD_SIZE])
 {
 	move *comuter_moves = get_rand_move_minmax(board);
-	do_move(board,comuter_moves);
+	perform_move(board,comuter_moves);
 	printf("Computer: move ");
 	print_move(comuter_moves);
 	// print_board(board,pretty_board);

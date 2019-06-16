@@ -106,6 +106,7 @@ magnetic_grid_manager* grid_manager;
 menu_manager* menu_man;
 int menu_ch=0;
 int counter = 10;
+int single_variation = 1;
 /* USER CODE END 0 */
 
 /**
@@ -239,7 +240,12 @@ int main(void)
 		if( GAME && is_check(board, WHITE_TURN)) strcpy(info_message,"CHECK");
 		else strcpy(info_message,"");
 
+		single_variation = 1;
 		current_status = player_control;
+		htim3.Init.Prescaler = 15999;
+		htim3.Init.Period = 999;
+		HAL_TIM_Base_Start_IT(&htim3);
+
 		WHITE_TURN = (WHITE_TURN + 1)%2;
 
 	}
@@ -322,6 +328,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 						next_state = (PLAYER_WHITE == 1)? player_control:elaboration;
 						set_invalid_menu(menu_man,0);
 						set_invalid_menu(menu_man,1);
+
+						single_variation = 1;
+						htim3.Init.Prescaler = 15999;
+						htim3.Init.Period = 99; //Check 100ms
+						HAL_TIM_Base_Start_IT(&htim3);
 					}
 				}
 				else menu_ch = 1;
@@ -330,10 +341,14 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 				if(player_input_game_manager() == 0){
 					next_state = elaboration;
 					WHITE_TURN = (WHITE_TURN + 1)%2;
+					HAL_TIM_Base_Stop_IT(&htim3);
 					 // if(current_status == choose_piece)
 				}
 				else {
+					HAL_TIM_Base_Stop_IT(&htim3);
 					next_state = error;
+					htim3.Init.Prescaler = 15999;
+					htim3.Init.Period = 999;
 					HAL_TIM_Base_Start_IT(&htim3);
 				}
 				break;
@@ -345,6 +360,11 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 				HAL_TIM_Base_Stop_IT(&htim3);
 				counter = 10;
 				next_state = player_control;
+				single_variation = 1;
+
+				htim3.Init.Prescaler = 15999;
+				htim3.Init.Period = 99; //Check 100ms
+				HAL_TIM_Base_Start_IT(&htim3);
 				break;
 			case end_game:
 				next_state = init;
@@ -363,7 +383,17 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-		if(htim == &htim3)counter --;
+		if(htim == &htim3 && current_status == error) counter--;
+		else if(htim == &htim3 && current_status == player_control){
+			// READ STATUS
+			HAL_TIM_Base_Stop_IT(htim);
+
+			if(read_magnetic_grid(grid_manager)>1){
+				single_variation = 0;
+			}
+
+			HAL_TIM_Base_Start_IT(htim);
+		}
 		else {
 			HAL_NVIC_EnableIRQ(EXTI1_IRQn);
 			HAL_TIM_Base_Stop_IT(htim);

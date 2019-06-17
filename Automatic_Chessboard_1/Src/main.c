@@ -24,6 +24,7 @@
 #include "dma.h"
 #include "i2c.h"
 #include "tim.h"
+#include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -99,6 +100,7 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN 0 */
 char board[BOARD_SIZE][BOARD_SIZE];
 char pretty_board[1000];
+char info_message[16] = "";
 char error_message[16];
 char end_message[16];
 Axis_manager* axis_manager;
@@ -138,22 +140,22 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_DMA_Init();
+  /*MX_DMA_Init();
   MX_ADC1_Init();
   MX_I2C2_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
   MX_TIM4_Init();
+  MX_USART2_UART_Init();*/
   /* USER CODE BEGIN 2 */
 
 
-	axis_manager = axis_manager_init(&htim2,100,GPIOB,GPIO_PIN_1,GPIOC,GPIO_PIN_8,3,GPIOB,GPIO_PIN_2,GPIOC,GPIO_PIN_5,3,GPIOB,GPIO_PIN_13,GPIOB,GPIO_PIN_14);
-	grid_manager = init_magnetic_grid();
+	axis_manager = axis_manager_init(&htim2,100,GPIOB,GPIO_PIN_1,GPIOC,GPIO_PIN_8,1,GPIOB,GPIO_PIN_2,GPIOC,GPIO_PIN_5,1,GPIOB,GPIO_PIN_13,GPIOB,GPIO_PIN_14);
+	/*grid_manager = init_magnetic_grid();
 	menu_man = menu_manager_init(hadc1);
 
 	HAL_ADC_Start_DMA(&hadc1,menu_man->raw_values,2);
 
-	char info_message[16] = "";
 	char tmp[MAXCHAR];
 	char color_choice[2][MAXCHAR];
 	strcpy(color_choice[0],"BLACK\0");
@@ -177,6 +179,11 @@ int main(void)
 
     show_menu(menu_man,0,0);
 
+    axis_manager_reset_position(axis_manager);
+
+    move_n_steps(&(axis_manager->x_stepper),500,BACKWARD);
+    move_n_steps(&(axis_manager->y_stepper),500,BACKWARD);*/
+    //SERVO_HOOK_on(&(axis_manager->hook));
   //print_board(board,pretty_board); //prints only if in console mode
   /* USER CODE END 2 */
 
@@ -185,9 +192,21 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+	  move_n_steps(&axis_manager->x_stepper,500,BACKWARD);
+	  HAL_Delay(10000);
+	  move_n_steps(&axis_manager->y_stepper,500,BACKWARD);
+	  HAL_Delay(10000);
+
+
+	  move_n_steps(&axis_manager->x_stepper,500,FORWARD);
+	  HAL_Delay(10000);
+
+	  move_n_steps(&axis_manager->y_stepper,500,FORWARD);
+	  HAL_Delay(10000);
+
 
     /* USER CODE BEGIN 3 */
-	  if(prev_stat != current_status){
+	 /* if(prev_stat != current_status){
 	  		  lcd_clear();
 	  		  HAL_Delay(10);
 	  		  prev_stat = current_status;
@@ -225,6 +244,11 @@ int main(void)
 		lcd_send_string ("Elaboration\0", 1);
 		HAL_Delay(10);
 		play_computer_turn(board);
+		lcd_send_string (info_message, 2);
+		HAL_Delay(10000);
+
+		read_magnetic_grid(grid_manager,0);
+		update_magnetic_grid(grid_manager);
 
 		if ( GAME && (GAME_STATUS = game_over(board)) ) {
 			GAME = 0;
@@ -268,7 +292,7 @@ int main(void)
 		lcd_send_string (end_message, 1);
 		lcd_send_string ("Press to restart", 2);
 		HAL_Delay(10);
-	}
+	}*/
 
   }
   /* USER CODE END 3 */
@@ -359,12 +383,20 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 			case error:
 				HAL_TIM_Base_Stop_IT(&htim3);
 				counter = 10;
-				next_state = player_control;
 				single_variation = 1;
 
-				htim3.Init.Prescaler = 15999;
-				htim3.Init.Period = 99; //Check 100ms
+				read_magnetic_grid(grid_manager, 0);
+				if(check_restoring(grid_manager)){
+					next_state = player_control;
+					htim3.Init.Prescaler = 15999;
+					htim3.Init.Period = 99; //Check 100ms
+				}
+				else{
+					next_state = error;
+				}
 				HAL_TIM_Base_Start_IT(&htim3);
+
+
 				break;
 			case end_game:
 				next_state = init;
@@ -388,7 +420,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			// READ STATUS
 			HAL_TIM_Base_Stop_IT(htim);
 
-			if(read_magnetic_grid(grid_manager)>1){
+			if(read_magnetic_grid(grid_manager,1)>1){
 				single_variation = 0;
 			}
 

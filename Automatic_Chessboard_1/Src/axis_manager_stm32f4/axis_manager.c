@@ -36,17 +36,17 @@ Axis_manager* axis_manager_init(TIM_HandleTypeDef *tim_pwm_handler,int frequency
 void axis_manager_reset_position(Axis_manager* axis){
 	SERVO_HOOK_off(&(axis->hook));
 
-	while(!axis_manager_check_limit(axis,1) && !axis_manager_check_limit(axis,0)){
-		move_half_cell(&(axis->x_stepper),BACKWARD);
-		move_half_cell(&(axis->y_stepper),BACKWARD);
-	}
+	/*while(!axis_manager_check_limit(axis,1) && !axis_manager_check_limit(axis,0)){
+		move_half_cell(&(axis->x_stepper),FORWARD);
+		move_half_cell(&(axis->y_stepper),FORWARD);
+	}*/
 
 	while(!axis_manager_check_limit(axis,1)){
-			move_half_cell(&(axis->x_stepper),BACKWARD);
+			move_half_cell(&(axis->x_stepper),FORWARD);
 	}
 
 	while(!axis_manager_check_limit(axis,0)){
-			move_half_cell(&(axis->y_stepper),BACKWARD);
+			move_half_cell(&(axis->y_stepper),FORWARD);
 	}
 
 	axis->current_position.row = ORIGIN;
@@ -113,7 +113,9 @@ void axis_manager_move(Axis_manager* axis,int start_row,int start_column,int end
 }
 
 int axis_manager_check_limit(Axis_manager* axis,int x){
-		return (x == 1 && HAL_GPIO_ReadPin(axis->xgroup_pin,axis->xpin) == GPIO_PIN_SET) || (x == 0 && HAL_GPIO_ReadPin(axis->ygroup_pin,axis->ypin) == GPIO_PIN_SET) ;
+		int ready = HAL_GPIO_ReadPin(axis->ygroup_pin,axis->ypin);
+		int readx = HAL_GPIO_ReadPin(axis->xgroup_pin,axis->xpin);
+		return (x == 1 &&  readx == GPIO_PIN_SET) || (x == 0 && ready == GPIO_PIN_SET) ;
 }
 
 void axis_manager_destoy(Axis_manager* axis){

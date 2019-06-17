@@ -13,6 +13,7 @@
 extern Axis_manager* axis_manager;
 extern struct magnetic_grid_manager* grid_manager;
 extern char error_message[16];
+extern char info_message[16];
 
 // Genral settings
 extern int MINIMAX_DEPTH;
@@ -1811,8 +1812,9 @@ void play_computer_turn(char board[BOARD_SIZE][BOARD_SIZE])
 {
 	move *comuter_moves = get_rand_move_minmax(board);
 	perform_move(board,comuter_moves);
-	printf("Computer: move ");
-	print_move(comuter_moves);
+	//printf("Computer: move ");
+	//print_move(comuter_moves);
+	sprintf(info_message,"(%d,%d) -> (%d,%d)",comuter_moves->from->row,comuter_moves->from->column,comuter_moves->to->row,comuter_moves->to->column);
 	// print_board(board,pretty_board);
 	free_move(comuter_moves);
 }  

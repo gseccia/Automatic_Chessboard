@@ -208,7 +208,7 @@ void EXTI1_IRQHandler(void)
 
 	//if(nLastPress + 2000 < HAL_GetTick()){
   /* USER CODE END EXTI1_IRQn 0 */
-	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1);
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1);
   /* USER CODE BEGIN EXTI1_IRQn 1 */
 	 HAL_NVIC_DisableIRQ(EXTI1_IRQn);
 	 HAL_TIM_Base_Start_IT(&htim4);

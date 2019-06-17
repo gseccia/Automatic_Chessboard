@@ -11,6 +11,7 @@
 
 #include "../chess_engine/Chess.h"
 #include "gpio.h"
+#include "usart.h"
 #include <stdlib.h>
 
 /**
@@ -35,7 +36,7 @@ magnetic_grid_manager* init_magnetic_grid();
   * @retval number of variation in the current state respect the previous one
   */
 
-int read_magnetic_grid(magnetic_grid_manager* magnetic_grid_manager);
+int read_magnetic_grid(magnetic_grid_manager* magnetic_grid_manager,int variation);
 
 /** @brief  It update �magnetic_grid_manager� putting the current state of the magnetic grid in �Magnetic_grid�, but first bring the content of �magnetic_grid� in �old_magnetic_grid� to preserve the value of the previous state.
   * @param  the the magnetic_grid_manager that manages the mapping matrix of the chess-men on the chess-board

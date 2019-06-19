@@ -73,7 +73,7 @@ void print_board( char board[BOARD_SIZE][BOARD_SIZE],char pretty_board[])
 
 /** initializes a full board chess board; placing the appropriate char (piece type&color)
   * in the 'board' array. */
-void init_board( char board[BOARD_SIZE][BOARD_SIZE] )
+void init_board( char board[BOARD_SIZE][BOARD_SIZE])
 {
 	int column,row;
 	char tmp;
@@ -87,6 +87,13 @@ void init_board( char board[BOARD_SIZE][BOARD_SIZE] )
 			if ( row == 0 || row == 7)
 			{
 				if ( row == 0 ) transform = 0; // don't transform to black
+				/*
+				if(!PLAYER_WHITE){
+					if ( row == 0 ) transform = 0; // don't transform to black
+				}
+				else{
+					if(row == 7) transform = 0;
+				}*/
 				switch( column )
 				{
 					case 0:
@@ -117,6 +124,12 @@ void init_board( char board[BOARD_SIZE][BOARD_SIZE] )
 			}
 			if ( row == 1 || row == 6 ) // pawns rows
 			{
+				/*if(!PLAYER_WHITE){
+					if ( row == 1 ) transform = 0; // don't transform to black
+				}
+				else{
+					if(row == 6) transform = 0;
+				}*/
 				if ( row == 1 ) transform = 0;
 				tmp = WHITE_P - transform;
 			}

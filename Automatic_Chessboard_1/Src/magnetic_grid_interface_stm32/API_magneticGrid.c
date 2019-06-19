@@ -14,8 +14,7 @@ GPIO_TypeDef* in_str_pins[8] = {GPIOB,GPIOB,GPIOA,GPIOA,GPIOA,GPIOB,GPIOC,GPIOA}
 magnetic_grid_manager* init_magnetic_grid(){
 	struct magnetic_grid_manager* magnetic_manager = (magnetic_grid_manager*)malloc(sizeof(magnetic_grid_manager));
 	/* read_magnetic_grid */
-	read_magnetic_grid(magnetic_manager,0);
-	update_magnetic_grid(magnetic_manager);
+	reset_magnetic_grid(magnetic_manager);
 	magnetic_manager->move_list = NULL;
 	return magnetic_manager;
 }
@@ -24,10 +23,9 @@ void reset_magnetic_grid(magnetic_grid_manager* magnetic_manager){
 	int i,j;
 	for(i=0;i<8;i++){
 		for(j=0;j<8;j++){
-			(magnetic_manager->magnetic_grid)[i][j] =(i<=1 || i>=7)? 1:0;
+			(magnetic_manager->old_magnetic_grid)[i][j] =(i<=1 || i>=6)? 1:0;
 		}
 	}
-	update_magnetic_grid(magnetic_manager);
 }
 
 int check_restoring(magnetic_grid_manager* magnetic_grid_manager){
@@ -59,19 +57,19 @@ int read_magnetic_grid(magnetic_grid_manager* magnetic_grid_manager,int variatio
 
 	int i,j,tmp,assigned,counter=0;
 	move* curr;
-	/**TMP PIN*
-	int sim[8][8];
-	for(i=0;i<8;i++)
-		for(j=0;j<8;j++)
-				sim[i][j] = (magnetic_grid_manager->magnetic_grid)[i][j];
-	**********/
+
+	/*int j_init,j_limit,j_mul;
+	j_init = (!PLAYER_WHITE)?0:7;
+	j_limit = (!PLAYER_WHITE)?7:0;
+	j_mul = (!PLAYER_WHITE)?1:-1;
+	BETTER EVALUE*/
 
 	for(i=0;i<8;i++){
 
 		HAL_GPIO_WritePin(out_str_pins[i], out_pins[i], GPIO_PIN_SET);
 		//HAL_Delay(1);
 
-		for(j = 0;j<8;j++){
+		for(j = 0/*j_init*/;j<8/*(!PLAYER_WHITE && j<=7) || (PLAYER_WHITE && j>=0)*/;j+=1/*j_mul*/){
 			// Get new cell state
 			tmp = (HAL_GPIO_ReadPin(in_str_pins[j], in_pins[j]) == GPIO_PIN_SET)? 1:0;
 			//tmp = sim[j][i];
@@ -163,12 +161,14 @@ move* fetch_moves(magnetic_grid_manager* magnetic_grid_manager){
 	prev = NULL;
 	int count = 0;
 	// Deletion "No movement!"
+	if(curr != NULL){
 	while(curr->next != NULL){
 		if(curr->from->column == curr->to->column && curr->from->row == curr->to->row){
 			if(prev == NULL){
 				free_location(curr->from);
 				free_location(curr->to);
 				curr = curr->next;
+				magnetic_grid_manager->move_list = curr;
 				prev = NULL;
 			}
 			else {
@@ -182,7 +182,7 @@ move* fetch_moves(magnetic_grid_manager* magnetic_grid_manager){
 		}
 		else curr = curr->next;
 	}
-
+	}
 	curr = magnetic_grid_manager->move_list;
 	while(curr!=NULL){
 		count++;
@@ -231,30 +231,4 @@ move* fetch_moves(magnetic_grid_manager* magnetic_grid_manager){
 		free_move(magnetic_grid_manager->move_list);
 		return NULL; // No possible movement with more of 2 moves
 	}
-
-
-	/*move* l = NULL;
-
-	int len = 0;
-
-	for(i=0;i<8;i++){
-		for(j=0;j<8;j++){
-			if((magnetic_grid_manager->magnetic_grid)[i][j] != (magnetic_grid_manager->old_magnetic_grid)[i][j]){
-
-				if (len == 0) {
-					l = create_move(0,0,0,0);
-					len++;
-				}
-
-				if((magnetic_grid_manager->magnetic_grid)[i][j] - (magnetic_grid_manager->old_magnetic_grid)[i][j] > 0){
-					l->to->row = i;
-					l->to->column = j;
-				}
-				else{
-					l->from->row = i;
-					l->from->column = j;
-				}
-			}
-		}
-	}*/
 }

@@ -109,6 +109,18 @@ menu_manager* menu_man;
 int menu_ch=0;
 int counter = 10;
 int single_variation = 1;
+
+int check_coherence(char board[BOARD_SIZE][BOARD_SIZE],magnetic_grid_manager* grid_manager){
+	int i,j;
+	for(i = 0;i < 8;i++){
+		for(j =0;j<8;j++){
+			if((board[j][i] == EMPTY && (grid_manager->magnetic_grid)[i][j] == 1) ||
+					(board[j][i] != EMPTY && (grid_manager->magnetic_grid)[i][j] == 0))return 0;
+		}
+	}
+	return 1;
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -174,11 +186,22 @@ int main(void)
 	createMenu(menu_man,"Are you ready?\0",start_choice,1,NULL,1);
 	createMenu(menu_man,"Piece Choose\0",piece_choice,4,&piece_ch,0);
 
-	current_status = init;
 	enum status prev_stat = init;
 	init_board(board);
 
-    show_menu(menu_man,0,0);
+	read_magnetic_grid(grid_manager,0);
+	if(!check_restoring(grid_manager)){
+		current_status = error;
+		htim3.Init.Prescaler = 15999;
+		htim3.Init.Period = 999;
+		HAL_TIM_Base_Start_IT(&htim3);
+		sprintf(error_message,"Illegal init");
+	}
+	else {
+		current_status = init;
+	    show_menu(menu_man,0,0);
+	}
+
 
     // axis_manager_reset_position(axis_manager);
 
@@ -227,15 +250,30 @@ int main(void)
 	}
 	else if(current_status == elaboration){
 		lcd_send_string ("Elaboration\0", 1);
-		HAL_Delay(10);
 		play_computer_turn(board);
 		lcd_send_string (info_message, 2);
-		//TO REMOVE
+		HAL_Delay(10);
+
+
 		HAL_Delay(10000);
 
 		read_magnetic_grid(grid_manager,0);
-		update_magnetic_grid(grid_manager);
-		// Possiblime check coherence
+		if(check_coherence(board,grid_manager)){
+			update_magnetic_grid(grid_manager);
+			single_variation = 1;
+			current_status = player_control;
+			htim3.Init.Prescaler = 15999;
+			htim3.Init.Period = 999;
+			HAL_TIM_Base_Start_IT(&htim3);
+		}
+		else{
+			current_status = error;
+			sprintf(error_message,"Do%s",info_message);
+			htim3.Init.Prescaler = 15999;
+			htim3.Init.Period = 9999;
+			HAL_TIM_Base_Start_IT(&htim3);
+		}
+
 
 		if ( GAME && (GAME_STATUS = game_over(board)) ) {
 			GAME = 0;
@@ -251,11 +289,6 @@ int main(void)
 		if( GAME && is_check(board, WHITE_TURN)) strcpy(info_message,"CHECK");
 		else strcpy(info_message,"");
 
-		single_variation = 1;
-		current_status = player_control;
-		htim3.Init.Prescaler = 15999;
-		htim3.Init.Period = 999;
-		HAL_TIM_Base_Start_IT(&htim3);
 
 		WHITE_TURN = (WHITE_TURN + 1)%2;
 
@@ -334,6 +367,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 				if(menu_man->current_menu == 1){
 					if(settings_input_manager() == -1){
 						next_state = init;
+						PLAYER_WHITE = 0;
+						WHITE_TURN = 1;
 					}
 					else{
 						next_state = (PLAYER_WHITE == 1)? player_control:elaboration;
@@ -373,18 +408,20 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 				single_variation = 1;
 
 				read_magnetic_grid(grid_manager, 0);
-				if(check_restoring(grid_manager)){
+
+				int coherence =	check_coherence(board,grid_manager);
+				if(coherence)update_magnetic_grid(grid_manager);
+
+				int restoring = check_restoring(grid_manager);
+				if(coherence && restoring){
 					next_state = player_control;
 					htim3.Init.Prescaler = 15999;
 					htim3.Init.Period = 99; //Check 100ms
 					free(grid_manager->move_list);
 					grid_manager->move_list = NULL;
 				}
-				else{
-					next_state = error;
-				}
-				HAL_TIM_Base_Start_IT(&htim3);
 
+				HAL_TIM_Base_Start_IT(&htim3);
 
 				break;
 			case end_game:
@@ -394,7 +431,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 				set_valid_menu(menu_man,1);
 
 				init_board(board);
-			    counter = 10;
+				reset_magnetic_grid(grid_manager);
+				PLAYER_WHITE = 0;
+				WHITE_TURN = 1;
+				counter = 10;
 
 				break;
 		}
@@ -409,7 +449,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			// READ STATUS
 			HAL_TIM_Base_Stop_IT(htim);
 
-			if(read_magnetic_grid(grid_manager,1)>1){
+			if(read_magnetic_grid(grid_manager,1)>2){
 				single_variation = 0;
 			}
 

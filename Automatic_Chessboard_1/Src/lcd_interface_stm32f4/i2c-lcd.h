@@ -1,7 +1,7 @@
 #ifndef I2C-LCD_H_
+#define I2C-LCD_H_
 #include "stm32f4xx_hal.h"
 #include "String.h"
-#define I2C-LCD_H_
 
 // commands
 typedef enum {

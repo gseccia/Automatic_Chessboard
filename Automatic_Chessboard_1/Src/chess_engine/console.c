@@ -461,9 +461,10 @@ void set_location( location l, int white, char piece )
 void perform_move(char a_board[BOARD_SIZE][BOARD_SIZE], move *user_move){
 	do_move(a_board,user_move);
 	//Mossa sulla scacchiera reale
-	int empty = a_board[user_move->to->column][user_move->to->row] == EMPTY;
+	/*int empty = a_board[user_move->to->column][user_move->to->row] == EMPTY;
 	if(!empty) axis_manager_move(axis_manager,user_move->to->row,user_move->to->column,OUT_CHESSBOARD,OUT_CHESSBOARD);
 	axis_manager_move(axis_manager,user_move->from->row,user_move->from->column,user_move->to->row,user_move->to->column);
+*/
 }
 
 int player_input_game_manager(){

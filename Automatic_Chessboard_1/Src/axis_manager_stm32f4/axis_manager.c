@@ -19,8 +19,8 @@ Axis_manager* axis_manager_init(TIM_HandleTypeDef *tim_pwm_handler,int frequency
 	axis_manager->current_position = current_position;
 
 	// Initialize Steppers and servo
-	axis_manager->x_stepper = stepper_init(motorAgroup_dir,motorAPin_dir,motorAgroup_step,motorAPin_step,motorA_delay);
-	axis_manager->y_stepper = stepper_init(motorBgroup_dir,motorBPin_dir,motorBgroup_step,motorBPin_step,motorB_delay);
+	axis_manager->x_stepper = stepper_init(motorAgroup_dir,motorAPin_dir,motorAgroup_step,motorAPin_step,motorA_delay,1);
+	axis_manager->y_stepper = stepper_init(motorBgroup_dir,motorBPin_dir,motorBgroup_step,motorBPin_step,motorB_delay,0);
 	axis_manager->hook = SERVO_HOOK_Init(tim_pwm_handler,frequency);
 
 	// Initialize limit PIN
@@ -41,16 +41,26 @@ void axis_manager_reset_position(Axis_manager* axis){
 		move_half_cell(&(axis->y_stepper),FORWARD);
 	}*/
 
-	while(!axis_manager_check_limit(axis,1)){
-			move_half_cell(&(axis->x_stepper),FORWARD);
+
+	int readx = HAL_GPIO_ReadPin(axis->xgroup_pin,axis->xpin);
+	while(readx == GPIO_PIN_RESET){
+			move_n_steps(&(axis->x_stepper),1,FORWARD);
+			readx = HAL_GPIO_ReadPin(axis->xgroup_pin,axis->xpin);
 	}
 
-	while(!axis_manager_check_limit(axis,0)){
-			move_half_cell(&(axis->y_stepper),FORWARD);
-	}
 
-	axis->current_position.row = ORIGIN;
-	axis->current_position.column = ORIGIN;
+	int ready = HAL_GPIO_ReadPin(axis->ygroup_pin,axis->ypin);
+			while(ready == GPIO_PIN_RESET){
+				move_n_steps(&(axis->y_stepper),1,FORWARD);
+				ready = HAL_GPIO_ReadPin(axis->ygroup_pin,axis->ypin);
+		}
+
+	move_n_steps(&axis->x_stepper,200,BACKWARD);
+	move_n_steps(&axis->y_stepper,405,BACKWARD);
+
+	axis->current_position.row = 0;
+	axis->current_position.column = 0;
+
 }
 
 void axis_manager_move(Axis_manager* axis,int start_row,int start_column,int end_row,int end_column){

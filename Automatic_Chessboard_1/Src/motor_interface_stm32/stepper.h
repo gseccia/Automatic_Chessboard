@@ -51,7 +51,7 @@ typedef enum {
 } Step_direction;
 
 /**
-  * @brief The struct “Stepper” represent the step motor.
+  * @brief The struct ï¿½Stepperï¿½ represent the step motor.
   * To control it we need to know which are the two  GPIO pins of the Board that allow us to set the direction and make a step;
   * the step delay is used to set the delay between two successive steps, so the speed of the motor.
   */
@@ -62,10 +62,11 @@ typedef struct Stepper{
 	GPIO_TypeDef* group_pin_step;
 	uint16_t pin_step;
 	uint32_t step_delay;
+	int x;
 }Stepper;
 
 //Initializer
-Stepper stepper_init(GPIO_TypeDef* group_pin_direction, uint16_t pin_direction, GPIO_TypeDef* group_pin_step, uint16_t pin_step, uint32_t step_delay);
+Stepper stepper_init(GPIO_TypeDef* group_pin_direction, uint16_t pin_direction, GPIO_TypeDef* group_pin_step, uint16_t pin_step, uint32_t step_delay,int x);
 
 
 // direction setter methood:

@@ -8,13 +8,14 @@
 #include "gpio.h"
 
 
-Stepper stepper_init(GPIO_TypeDef* group_pin_direction, uint16_t pin_direction, GPIO_TypeDef* group_pin_step, uint16_t pin_step, uint32_t step_delay){
+Stepper stepper_init(GPIO_TypeDef* group_pin_direction, uint16_t pin_direction, GPIO_TypeDef* group_pin_step, uint16_t pin_step, uint32_t step_delay,int x){
 	Stepper s = {
 	  .group_pin_direction = group_pin_direction,
 	  .pin_direction = pin_direction,
 	  .group_pin_step = group_pin_step,
 	  .pin_step = pin_step,
 	  .step_delay = step_delay,
+	  .x =x,
 	};
 	return s;
 }
@@ -43,11 +44,13 @@ void move_n_steps(Stepper* s, int number_of_steps, Step_direction direction){
 
 
 void move_half_cell(Stepper* stepper, Step_direction direction){
-
+	if(stepper->x)move_n_steps(stepper, 143, direction);
+	else move_n_steps(stepper, 160, direction);
 }
 
 void move_full_cell(Stepper* stepper, Step_direction direction){
-
+	move_half_cell(stepper, direction);
+	move_half_cell(stepper, direction);
 }
 
 void move_n_cells(Stepper* stepper, int num_cell, Step_direction direction){

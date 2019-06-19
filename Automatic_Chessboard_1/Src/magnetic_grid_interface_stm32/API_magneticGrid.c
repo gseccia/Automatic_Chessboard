@@ -166,18 +166,16 @@ move* fetch_moves(magnetic_grid_manager* magnetic_grid_manager){
 	while(curr->next != NULL){
 		if(curr->from->column == curr->to->column && curr->from->row == curr->to->row){
 			if(prev == NULL){
-				prev = magnetic_grid_manager->move_list->next;
 				free_location(curr->from);
 				free_location(curr->to);
-				free(curr);
-				curr = prev;
+				curr = curr->next;
 				prev = NULL;
 			}
 			else {
 				prev->next = curr->next;
 				free_location(curr->from);
 				free_location(curr->to);
-				free(curr);
+				curr->next = NULL;
 				curr = prev->next;
 			}
 

@@ -33,19 +33,20 @@ magnetic_grid_manager* init_magnetic_grid();
 
 /** @brief  fetch the magnetic grid and build a mapping-matrix of the chess-men on the chess-board
   * @param  the magnetic_grid_manager that manages the mapping matrix of the chess-men on the chess-board
+  * @param  is used as a boolean, if his value is 0 this method perform a simple fetch od the grid, otherwise fetch the grid and capture a variation
   * @retval number of variation in the current state respect the previous one
   */
 
 int read_magnetic_grid(magnetic_grid_manager* magnetic_grid_manager,int variation);
 
-/** @brief  It update �magnetic_grid_manager� putting the current state of the magnetic grid in �Magnetic_grid�, but first bring the content of �magnetic_grid� in �old_magnetic_grid� to preserve the value of the previous state.
+/** @brief  It update magnetic_grid_manager putting the current state of the magnetic grid in �Magnetic_grid�, but first bring the content of �magnetic_grid� in �old_magnetic_grid� to preserve the value of the previous state.
   * @param  the the magnetic_grid_manager that manages the mapping matrix of the chess-men on the chess-board
   * @retval None
   */
 
 void update_magnetic_grid(magnetic_grid_manager* magnetic_grid_manager);
 
-/** @brief  It reset �magnetic_grid_manager�
+/** @brief  It reset magnetic_grid_manager
   * @param  the the magnetic_grid_manager that manages the mapping matrix of the chess-men on the chess-board
   * @retval None
   */

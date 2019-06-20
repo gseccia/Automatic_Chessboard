@@ -536,8 +536,8 @@ int player_input_game_manager(){
 				int white_piece = IS_WHITE(board[m->from->column][m->from->row]);
 				if(((board[m->from->column][m->from->row] == WHITE_P) || (board[m->from->column][m->from->row] == BLACK_P))
 					&& ((white_piece && m->to->row == BOARD_SIZE-1) || (!white_piece && m->to->row == 0))){
-					ch_i = m->from->column;
-					ch_j = m->from->row;
+					ch_i = m->to->column;
+					ch_j = m->to->row;
 					return 2;
 				}
 

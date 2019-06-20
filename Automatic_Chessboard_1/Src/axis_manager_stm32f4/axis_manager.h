@@ -24,9 +24,9 @@ struct Axis_manager{
 };
 typedef struct Axis_manager Axis_manager;
 
-#define UNKNOWN -2
-#define ORIGIN -1
-#define OUT_CHESSBOARD 10
+#define UNKNOWN -1
+#define ORIGIN 0
+#define OUT_CHESSBOARD 8
 
 /**
  * This fuction creates a new axis manager.

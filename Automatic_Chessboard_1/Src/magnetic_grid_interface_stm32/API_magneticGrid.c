@@ -66,7 +66,14 @@ int read_magnetic_grid(magnetic_grid_manager* magnetic_grid_manager,int variatio
 
 	for(i=0;i<8;i++){
 
-		HAL_GPIO_WritePin(out_str_pins[i], out_pins[i], GPIO_PIN_SET);
+		if(!PLAYER_WHITE){
+			tmp = i;
+			i = 7 - i;
+			HAL_GPIO_WritePin(out_str_pins[i], out_pins[i], GPIO_PIN_SET);
+			i = tmp;
+		}
+		else HAL_GPIO_WritePin(out_str_pins[i], out_pins[i], GPIO_PIN_SET);
+
 		//HAL_Delay(1);
 
 		for(j = 0/*j_init*/;j<8/*(!PLAYER_WHITE && j<=7) || (PLAYER_WHITE && j>=0)*/;j+=1/*j_mul*/){

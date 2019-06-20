@@ -24,8 +24,8 @@ extern int TWO_PLAYERS_MODE; // '1' - two players mode, '0' - player vs. AI mode
 extern int WHITE_TURN; // 0 - black, 1- white
 extern int PLAYER_WHITE;
 extern char board[BOARD_SIZE][BOARD_SIZE];
-extern char pretty_board[1000];
 extern int GAME_STATUS;
+extern int ch_i,ch_j;
 
 // Game setiings
 extern int CHECK_ON_WHITE;
@@ -536,6 +536,8 @@ int player_input_game_manager(){
 				int white_piece = IS_WHITE(board[m->from->column][m->from->row]);
 				if(((board[m->from->column][m->from->row] == WHITE_P) || (board[m->from->column][m->from->row] == BLACK_P))
 					&& ((white_piece && m->to->row == BOARD_SIZE-1) || (!white_piece && m->to->row == 0))){
+					ch_i = m->from->column;
+					ch_j = m->from->row;
 					return 2;
 				}
 

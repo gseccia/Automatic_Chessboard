@@ -99,24 +99,30 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 char board[BOARD_SIZE][BOARD_SIZE];
-char pretty_board[1000];
 char info_message[16] = "";
 char error_message[16];
 char end_message[16];
+char value_ch;
 Axis_manager* axis_manager;
 magnetic_grid_manager* grid_manager;
 menu_manager* menu_man;
 int menu_ch=0;
 int counter = 10;
 int single_variation = 1;
+int ch_i,ch_j;
 
 int check_coherence(char board[BOARD_SIZE][BOARD_SIZE],magnetic_grid_manager* grid_manager){
-	int i,j;
+	int i,j,tmp;
 	for(i = 0;i < 8;i++){
+		if(!PLAYER_WHITE){
+			tmp = i;
+			i =7-i;
+		}
 		for(j =0;j<8;j++){
 			if((board[j][i] == EMPTY && (grid_manager->magnetic_grid)[i][j] == 1) ||
 					(board[j][i] != EMPTY && (grid_manager->magnetic_grid)[i][j] == 0))return 0;
 		}
+		if(!PLAYER_WHITE)i =tmp;
 	}
 	return 1;
 }
@@ -204,7 +210,7 @@ int main(void)
 	}
 
 
-    // axis_manager_reset_position(axis_manager);
+    axis_manager_reset_position(axis_manager);
 
   /* USER CODE END 2 */
 
@@ -255,9 +261,6 @@ int main(void)
 		lcd_send_string (info_message, 2);
 		HAL_Delay(10);
 
-
-		HAL_Delay(10000);
-
 		read_magnetic_grid(grid_manager,0);
 		if(check_coherence(board,grid_manager)){
 			update_magnetic_grid(grid_manager);
@@ -297,6 +300,23 @@ int main(void)
 	}
 	else if(current_status == choose_piece){
 		change_choice(menu_man);
+		switch(piece_ch){
+			case 0:
+				value_ch = (PLAYER_WHITE)? WHITE_Q:BLACK_Q;
+				break;
+			case 1:
+				value_ch = (PLAYER_WHITE)? WHITE_N:BLACK_N;
+				break;
+			case 2:
+				value_ch = (PLAYER_WHITE)? WHITE_B:BLACK_B;
+				break;
+			case 3:
+				value_ch = (PLAYER_WHITE)? WHITE_R:BLACK_R;
+				break;
+			default:
+				value_ch = (PLAYER_WHITE)? WHITE_Q:BLACK_Q;
+				break;
+		}
 	}
 	else if(current_status == error){
 		sprintf(tmp,"%2d",counter);
@@ -364,6 +384,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 
 	if(GPIO_Pin == GPIO_PIN_1 && current_status != elaboration){
 		enum status next_state = current_status;
+		int player_stat;
 		switch(current_status){
 			case init:
 				if(menu_man->current_menu == 1){
@@ -386,7 +407,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 				else menu_ch = 1;
 				break;
 			case player_control:
-				int player_stat = player_input_game_manager();
+				player_stat = player_input_game_manager();
 				if(player_stat == 0){
 					next_state = elaboration;
 					WHITE_TURN = (WHITE_TURN + 1)%2;
@@ -408,7 +429,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 				break;
 			case choose_piece:
 				set_invalid_menu(menu_man,2);
-				// make promote, go error or player_control
+				board[ch_i][ch_j] = value_ch;
+				next_state = elaboration;
+				// make promote player_control
 				break;
 			case error:
 				HAL_TIM_Base_Stop_IT(&htim3);
@@ -464,7 +487,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			// READ STATUS
 			HAL_TIM_Base_Stop_IT(htim);
 
-			if(read_magnetic_grid(grid_manager,1)>2){
+			if(read_magnetic_grid(grid_manager,1)>1){
 				single_variation = 0;
 			}
 

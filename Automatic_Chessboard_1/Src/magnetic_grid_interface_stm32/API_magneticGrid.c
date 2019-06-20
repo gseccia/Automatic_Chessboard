@@ -178,7 +178,6 @@ move* fetch_moves(magnetic_grid_manager* magnetic_grid_manager){
 				curr->next = NULL;
 				curr = prev->next;
 			}
-
 		}
 		else curr = curr->next;
 	}
@@ -198,10 +197,61 @@ move* fetch_moves(magnetic_grid_manager* magnetic_grid_manager){
 		first=magnetic_grid_manager->move_list;
 		second=magnetic_grid_manager->move_list->next;
 
-		/*if((first->to->column != 10 && first->to->row != 10) && (second->to->column != 10 && second->to->row != 10) ){
-			// ARROCCO
-		}*/
-		if(first->to->column == 10 && first->to->row == 10){
+		if((first->to->column != 10 && first->to->row != 10) && (second->to->column != 10 && second->to->row != 10) ){
+			char first_piece = board[first->from->column][first->from->row];
+			char second_piece =  board[second->from->column][second->from->row];
+			move* rook = NULL;
+			move* king = NULL;
+			int color_f, color_b;
+			color_f = IS_WHITE(first_piece);
+			color_b = IS_WHITE(second_piece);
+
+			switch(first_piece){
+				case BLACK_K:
+					king = first;
+					break;
+				case BLACK_R:
+					rook = first;
+					break;
+				case WHITE_K:
+					king = first;
+					break;
+				case WHITE_R:
+					rook = first;
+					break;
+			}
+
+			switch(second_piece){
+							case BLACK_K:
+								king = second;
+								break;
+							case BLACK_R:
+								rook = second;
+								break;
+							case WHITE_K:
+								king = second;
+								break;
+							case WHITE_R:
+								rook = second;
+								break;
+				}
+
+			// Verifica ARROCCO!
+			if(!(color_b == PLAYER_WHITE && color_f == PLAYER_WHITE && king != NULL && rook != NULL
+					&& ((king->from->row == 7 && king->to->row == 7  && rook->from->row == 7 && rook->to->row == 7)
+							|| (king->from->row == 0 && king->to->row == 0 && rook->from->row == 0 && rook->to->row == 0))
+					&& ((king->from->column == 4 && king->to->column == 6 && rook->from->column == 7 && rook->to->column == 5)
+							|| (king->from->column == 4 && king->to->column == 1 && rook->from->column == 0 && rook->to->column == 2)
+									||(king->from->column == 3 && king->to->column == 1 && rook->from->column == 0 && rook->to->column == 2)
+											||(king->from->column == 3 && king->to->column == 6 && rook->from->column == 7 && rook->to->column == 5))))
+			{
+				free_move(magnetic_grid_manager->move_list);
+				magnetic_grid_manager->move_list = NULL;
+			}
+
+
+		}
+		else if(first->to->column == 10 && first->to->row == 10){
 			// Possible Take a piece
 			second->to->column = first->from->column;
 			second->to->row = first->from->row;
@@ -222,6 +272,10 @@ move* fetch_moves(magnetic_grid_manager* magnetic_grid_manager){
 			free(second);
 			magnetic_grid_manager->move_list = first;
 			first->next = NULL;
+		}
+		else {
+			free_move(magnetic_grid_manager->move_list);
+			magnetic_grid_manager->move_list = NULL;
 		}
 
 

@@ -9,7 +9,7 @@
 #include "../axis_manager_stm32f4/axis_manager.h"
 #include "../magnetic_grid_interface_stm32/API_magneticGrid.h"
 
-//ANTONIO LIBRERIA DISPLAY DA AGGIUNGERE
+
 extern Axis_manager* axis_manager;
 extern struct magnetic_grid_manager* grid_manager;
 extern char error_message[16];
@@ -474,17 +474,14 @@ void set_location( location l, int white, char piece )
 void perform_move(char a_board[BOARD_SIZE][BOARD_SIZE], move *user_move){
 	do_move(a_board,user_move);
 	//Mossa sulla scacchiera reale
-	/*int empty = a_board[user_move->to->column][user_move->to->row] == EMPTY;
+	int empty = a_board[user_move->to->column][user_move->to->row] == EMPTY;
 	if(!empty) axis_manager_move(axis_manager,user_move->to->row,user_move->to->column,OUT_CHESSBOARD,OUT_CHESSBOARD);
 	axis_manager_move(axis_manager,user_move->from->row,user_move->from->column,user_move->to->row,user_move->to->column);
-*/
 }
+
 
 int player_input_game_manager(){
 	// Read the grid and get the move
-
-	/*(grid_manager->magnetic_grid)[1][1] = 0;
-	(grid_manager->magnetic_grid)[2][1] = 1;*/
 
 	move *m = fetch_moves(grid_manager);
 
@@ -535,6 +532,12 @@ int player_input_game_manager(){
 	{
 				DO_DEBUG(print_message("move: move is legal checked \n"); fflush(stdout);)
 				update_magnetic_grid(grid_manager); //Update status
+
+				int white_piece = IS_WHITE(board[m->from->column][m->from->row]);
+				if(((board[m->from->column][m->from->row] == WHITE_P) || (board[m->from->column][m->from->row] == BLACK_P))
+					&& ((white_piece && m->to->row == BOARD_SIZE-1) || (!white_piece && m->to->row == 0))){
+					return 2;
+				}
 
 				do_move(board, m);
 				free_move(m);

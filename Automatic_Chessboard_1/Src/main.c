@@ -62,7 +62,7 @@ enum status{
 	choose_piece  = 3,
 	error = 4,
 	end_game = 5
-} current_status;
+} current_status,prev_stat,origin_error;
 
 int GAME = 0;
 int SETTINGS = 1;
@@ -163,7 +163,7 @@ int main(void)
 
 	HAL_ADC_Start_DMA(&hadc1,menu_man->raw_values,2);
 
-  	axis_manager = axis_manager_init(&htim2,100,GPIOB,GPIO_PIN_1,GPIOC,GPIO_PIN_8,3,GPIOB,GPIO_PIN_2,GPIOC,GPIO_PIN_5,3,GPIOB,GPIOB,GPIO_PIN_13,GPIO_PIN_14);
+  	axis_manager = axis_manager_init(&htim2,100,GPIOB,GPIO_PIN_1,GPIOB,GPIO_PIN_2,3,GPIOC,GPIO_PIN_8,GPIOC,GPIO_PIN_5,3,GPIOB,GPIOB,GPIO_PIN_13,GPIO_PIN_14);
 	grid_manager = init_magnetic_grid();
 	menu_man = menu_manager_init(hadc1);
 
@@ -186,7 +186,7 @@ int main(void)
 	createMenu(menu_man,"Are you ready?\0",start_choice,1,NULL,1);
 	createMenu(menu_man,"Piece Choose\0",piece_choice,4,&piece_ch,0);
 
-	enum status prev_stat = init;
+	prev_stat = init;
 	init_board(board);
 
 	read_magnetic_grid(grid_manager,0);
@@ -195,6 +195,7 @@ int main(void)
 		htim3.Init.Prescaler = 15999;
 		htim3.Init.Period = 999;
 		HAL_TIM_Base_Start_IT(&htim3);
+		origin_error = init;
 		sprintf(error_message,"Illegal init");
 	}
 	else {
@@ -268,6 +269,7 @@ int main(void)
 		}
 		else{
 			current_status = error;
+			origin_error = elaboration;
 			sprintf(error_message,"Do%s",info_message);
 			htim3.Init.Prescaler = 15999;
 			htim3.Init.Period = 9999;
@@ -384,15 +386,21 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 				else menu_ch = 1;
 				break;
 			case player_control:
-				if(player_input_game_manager() == 0){
+				int player_stat = player_input_game_manager();
+				if(player_stat == 0){
 					next_state = elaboration;
 					WHITE_TURN = (WHITE_TURN + 1)%2;
 					HAL_TIM_Base_Stop_IT(&htim3);
-					 // if(current_status == choose_piece)
 				}
-				else {
+				else if(player_stat == 2){
+					next_state = choose_piece;
+					WHITE_TURN = (WHITE_TURN + 1)%2;
+					HAL_TIM_Base_Stop_IT(&htim3);
+				}
+				else{
 					HAL_TIM_Base_Stop_IT(&htim3);
 					next_state = error;
+					origin_error = player_control;
 					htim3.Init.Prescaler = 15999;
 					htim3.Init.Period = 999;
 					HAL_TIM_Base_Start_IT(&htim3);
@@ -410,11 +418,18 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 				read_magnetic_grid(grid_manager, 0);
 
 				int coherence =	check_coherence(board,grid_manager);
-				if(coherence)update_magnetic_grid(grid_manager);
-
 				int restoring = check_restoring(grid_manager);
-				if(coherence && restoring){
+
+				if((origin_error == elaboration || origin_error == init) && check_coherence(board,grid_manager)){
+					update_magnetic_grid(grid_manager);
+					if(origin_error == init) next_state = init;
+					else next_state = player_control;
+				}
+				else if(origin_error == player_control && restoring){
 					next_state = player_control;
+				}
+
+				if(next_state == player_control){
 					htim3.Init.Prescaler = 15999;
 					htim3.Init.Period = 99; //Check 100ms
 					free(grid_manager->move_list);

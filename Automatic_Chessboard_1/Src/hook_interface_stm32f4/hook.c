@@ -18,8 +18,8 @@
 SERVO_HOOK SERVO_HOOK_Init(TIM_HandleTypeDef *tim_pwm_handler,int frequency){
 	SERVO_HOOK servo ={
 			.tim_pwm_handler=tim_pwm_handler,
-			.ccr_off=40,
-			.ccr_on=105
+			.ccr_off=50,
+			.ccr_on=115
 	};
 	//sostituire con calcolo specifico basato sulla frequenza del pwm
 	return servo;

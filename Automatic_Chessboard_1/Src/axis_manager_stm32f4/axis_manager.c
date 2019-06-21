@@ -42,11 +42,7 @@ void axis_manager_reset_position(Axis_manager* axis){
 	}*/
 
 
-	int readx = HAL_GPIO_ReadPin(axis->xgroup_pin,axis->xpin);
-	while(readx == GPIO_PIN_RESET){
-			move_n_steps(&(axis->x_stepper),1,FORWARD);
-			readx = HAL_GPIO_ReadPin(axis->xgroup_pin,axis->xpin);
-	}
+
 
 
 	int ready = HAL_GPIO_ReadPin(axis->ygroup_pin,axis->ypin);
@@ -55,7 +51,13 @@ void axis_manager_reset_position(Axis_manager* axis){
 				ready = HAL_GPIO_ReadPin(axis->ygroup_pin,axis->ypin);
 		}
 
-	move_n_steps(&axis->x_stepper,200,BACKWARD);
+	int readx = HAL_GPIO_ReadPin(axis->xgroup_pin,axis->xpin);
+		while(readx == GPIO_PIN_RESET){
+				move_n_steps(&(axis->x_stepper),1,FORWARD);
+				readx = HAL_GPIO_ReadPin(axis->xgroup_pin,axis->xpin);
+		}
+
+	move_n_steps(&axis->x_stepper,250,BACKWARD);
 	move_n_steps(&axis->y_stepper,405,BACKWARD);
 
 	axis->current_position.row = 0;
@@ -66,6 +68,8 @@ void axis_manager_reset_position(Axis_manager* axis){
 void axis_manager_move(Axis_manager* axis,int start_row,int start_column,int end_row,int end_column){
 	int drow,dcol;
 	Step_direction dirx,diry;
+
+
 
 	// Move the steppers to starting position
 	drow = start_row - axis->current_position.row;
@@ -86,15 +90,23 @@ void axis_manager_move(Axis_manager* axis,int start_row,int start_column,int end
 	move_n_cells(&(axis->y_stepper), drow,dirx);
 	move_n_cells(&(axis->x_stepper), dcol,diry);
 
+	axis->current_position.row = start_row;
+	axis->current_position.column = start_column;
+
 	// Active hook
 	SERVO_HOOK_on(&(axis->hook));
 
-	// Move on the boundary
-	move_half_cell(&(axis->x_stepper),FORWARD);
+	// Move on the cross
+	if(axis->current_position.row == 0) move_half_cell(&(axis->y_stepper),BACKWARD);
+	else move_half_cell(&(axis->y_stepper),FORWARD);
+	move_half_cell(&(axis->x_stepper),BACKWARD);
 
 	// Move the steppers to the end position
 	drow = end_row - start_row;
 	dcol = end_column - start_column;
+
+	if((!(end_row == 0 && start_row == 0)) && (end_row == 0 || start_row == 0))drow = (drow>0)? drow-1:drow+1;
+
 
 	if(drow < 0){
 			drow = -drow;
@@ -108,18 +120,35 @@ void axis_manager_move(Axis_manager* axis,int start_row,int start_column,int end
 	}
 	else diry = BACKWARD;
 
-	move_n_cells(&(axis->y_stepper), drow,dirx);
+	if(end_column == OUT_CHESSBOARD){
+		dcol = dcol-1;
+		move_half_cell(&(axis->x_stepper),diry);
+	}
+
 	move_n_cells(&(axis->x_stepper), dcol,diry);
+	move_n_cells(&(axis->y_stepper), drow,dirx);
+
 
 	// Move on the cell
-	move_half_cell(&(axis->x_stepper),BACKWARD);
+	move_half_cell(&(axis->x_stepper),FORWARD);
+	move_n_steps(&(axis->x_stepper),71,FORWARD);
+
+	if(end_row == 0) move_half_cell(&(axis->y_stepper),FORWARD);
+	else move_half_cell(&(axis->y_stepper),BACKWARD);
+
 
 	// Set current position
 	axis->current_position.row = end_row;
-	axis->current_position.column = end_column;
+	axis->current_position.column = (end_column == OUT_CHESSBOARD)? end_column-1:end_column;
 
 	// Disable Hook
 	SERVO_HOOK_off(&(axis->hook));
+	move_n_steps(&(axis->x_stepper),71,BACKWARD);
+
+	if(end_column == OUT_CHESSBOARD){
+			move_half_cell(&(axis->x_stepper),FORWARD);
+	}
+
 }
 
 int axis_manager_check_limit(Axis_manager* axis,int x){

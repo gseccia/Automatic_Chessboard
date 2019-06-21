@@ -21,6 +21,9 @@ menu_manager* menu_manager_init(ADC_HandleTypeDef handle){
 	 menu_man->current_choice = -1;
 	 menu_man->center_y = 1;
 	 menu_man->center_x = 1;
+	 menu_man->raw_values[0] = 0;
+	 menu_man->raw_values[1] = 0;
+
 	 lcd_init();
 	 lcd_clear();
 	 return menu_man;
@@ -79,7 +82,7 @@ void change_choice(menu_manager* manager){
 	uint32_t y;
 
 	// x = manager->raw_values[0];
-	y = manager->raw_values[1];
+	y = manager->raw_values[0];
 
 	if(manager->center_y){
 		if (y < 10 && manager->current_choice-1 > -1){
@@ -89,7 +92,7 @@ void change_choice(menu_manager* manager){
 			if((manager->menus)[manager->current_menu]->variable != NULL)
 				*((manager->menus)[manager->current_menu]->variable) = manager->current_choice;
 
-		}else if (y> 820 && manager->current_choice+1 < (manager->menus)[manager->current_menu]->chioces_len){
+		}else if (y> 1000 && manager->current_choice+1 < (manager->menus)[manager->current_menu]->chioces_len){
 			manager->current_choice++;
 			show_menu(manager,manager->current_menu,manager->current_choice);
 			manager->center_y = 0;
@@ -98,27 +101,27 @@ void change_choice(menu_manager* manager){
 		}
 	}
 	else{
-		manager->center_y = (y > 10 && y < 820);
+		manager->center_y = (y > 10 && y < 1000);
 	}
 }
 
 void change_menu(menu_manager* manager){
 	uint32_t x;
-	x = manager->raw_values[0];
+	x = manager->raw_values[1];
 
 	if(manager->center_x){
 		if (x < 10 && manager->current_menu-1 > -1){
 			manager->current_menu--;
 			manager->center_x = 0;
 			show_menu(manager,manager->current_menu,0);
-		}else if (x > 820 && manager->current_menu+1 < manager->menu_len){
+		}else if (x > 1000 && manager->current_menu+1 < manager->menu_len){
 			manager->current_menu++;
 			manager->center_x = 0;
 			show_menu(manager,manager->current_menu,0);
 		}
 	}
 	else {
-		manager->center_x = (x>10 && x<820);
+		manager->center_x = (x>10 && x<1000);
 	}
 }
 

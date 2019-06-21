@@ -15,6 +15,7 @@ extern Axis_manager* axis_manager;
 extern struct magnetic_grid_manager* grid_manager;
 extern char error_message[16];
 extern char info_message[16];
+extern char solver_message[16];
 
 // Genral settings
 extern int MINIMAX_DEPTH;
@@ -475,9 +476,11 @@ void set_location( location l, int white, char piece )
 void perform_move(char a_board[BOARD_SIZE][BOARD_SIZE], move *user_move){
 	int empty = a_board[user_move->to->column][user_move->to->row] == EMPTY;
 	do_move(a_board,user_move);
+
 	//Mossa sulla scacchiera reale
-	if(!empty) axis_manager_move(axis_manager,user_move->to->row,user_move->to->column,OUT_CHESSBOARD,OUT_CHESSBOARD);
+	if(!empty) axis_manager_move(axis_manager,user_move->to->row,user_move->to->column,user_move->to->row,OUT_CHESSBOARD);
 	axis_manager_move(axis_manager,user_move->from->row,user_move->from->column,user_move->to->row,user_move->to->column);
+
 }
 
 
@@ -504,6 +507,10 @@ int player_input_game_manager(){
 	if ( !is_legal_location(from) || !is_legal_location(to))
 	{
 				strcpy(error_message,"Illegal pos");//print_message(WRONG_POSITION);
+				if(m == NULL) sprintf(solver_message,"Wrong Move!");
+				else if(to.column == -1 && to.row==-1)sprintf(solver_message,"%c%d miss repos",'H'-from.column,8-from.row);
+
+
 				free_move(m);
 				//ANTONIO Mossa Errata e ripristino
 				return 1; // repeat
@@ -511,6 +518,7 @@ int player_input_game_manager(){
 	else if ( (WHITE_TURN && !IS_WHITE(board[from.column][from.row])) || (!WHITE_TURN && !IS_BLACK(board[from.column][from.row])))
 	{
 				strcpy(error_message,"Illegal piece");
+				sprintf(solver_message,"Taken %c%d",'H'-from.column,8-from.row);
 				// print_message(NOT_YOUR_PIECE);
 				free_move(m);
 				return 1; // repeat
@@ -526,6 +534,7 @@ int player_input_game_manager(){
 	{
 				free_move(m);
 				strcpy(error_message,"Illegal move");//print_message(ILLEGAL_MOVE);
+				sprintf(solver_message,"%c%d -> %c%d",'H'-from.column,8-from.row,'H'-to.column,8-to.row);
 				//ANTONIO Mossa Errata e ripristino
 				return 1; // repeat
 	}

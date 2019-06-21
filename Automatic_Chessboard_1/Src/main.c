@@ -102,12 +102,13 @@ char board[BOARD_SIZE][BOARD_SIZE];
 char info_message[16] = "";
 char error_message[16];
 char end_message[16];
+char solver_message[16];
 char value_ch;
 Axis_manager* axis_manager;
 magnetic_grid_manager* grid_manager;
 menu_manager* menu_man;
 int menu_ch=0;
-int counter = 10;
+int counter = 30;
 int single_variation = 1;
 int ch_i,ch_j;
 
@@ -120,7 +121,11 @@ int check_coherence(char board[BOARD_SIZE][BOARD_SIZE],magnetic_grid_manager* gr
 		}
 		for(j =0;j<8;j++){
 			if((board[j][i] == EMPTY && (grid_manager->magnetic_grid)[i][j] == 1) ||
-					(board[j][i] != EMPTY && (grid_manager->magnetic_grid)[i][j] == 0))return 0;
+					(board[j][i] != EMPTY && (grid_manager->magnetic_grid)[i][j] == 0)){
+				ch_i = i;
+				ch_j = j;
+				return 0;
+			}
 		}
 		if(!PLAYER_WHITE)i =tmp;
 	}
@@ -167,11 +172,11 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
-	HAL_ADC_Start_DMA(&hadc1,menu_man->raw_values,2);
-
   	axis_manager = axis_manager_init(&htim2,100,GPIOB,GPIO_PIN_1,GPIOB,GPIO_PIN_2,3,GPIOC,GPIO_PIN_8,GPIOC,GPIO_PIN_5,3,GPIOB,GPIOB,GPIO_PIN_13,GPIO_PIN_14);
 	grid_manager = init_magnetic_grid();
 	menu_man = menu_manager_init(hadc1);
+
+	HAL_ADC_Start_DMA(&hadc1,menu_man->raw_values,2);
 
 	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_1);
 
@@ -195,7 +200,17 @@ int main(void)
 	prev_stat = init;
 	init_board(board);
 
-    axis_manager_reset_position(axis_manager);
+
+	lcd_send_string("Reset Motors'",1);
+	HAL_Delay(10);
+	lcd_send_string("Position",2);
+	HAL_Delay(10);
+
+	axis_manager_reset_position(axis_manager);
+
+    /* EXTI interrupt init*/
+      HAL_NVIC_SetPriority(EXTI1_IRQn, 0, 0);
+      HAL_NVIC_EnableIRQ(EXTI1_IRQn);
 
 	read_magnetic_grid(grid_manager,0);
 	if(!check_restoring(grid_manager)){
@@ -205,6 +220,7 @@ int main(void)
 		HAL_TIM_Base_Start_IT(&htim3);
 		origin_error = init;
 		sprintf(error_message,"Illegal init");
+		sprintf(solver_message,"Repos %c%d",'H'-ch_j,8-ch_i);
 	}
 	else {
 		current_status = init;
@@ -227,6 +243,19 @@ int main(void)
 	  		  HAL_Delay(10);
 	  		  prev_stat = current_status;
 	  		  if(current_status == init){
+	  			if(prev_stat == end_game && !check_restoring(grid_manager)){
+	  					current_status = error;
+	  					htim3.Init.Prescaler = 15999;
+	  					htim3.Init.Period = 999;
+	  					HAL_TIM_Base_Start_IT(&htim3);
+	  					origin_error = init;
+	  					init_board(board);
+	  					reset_magnetic_grid(grid_manager);
+	  					axis_manager_reset_position(axis_manager);
+
+	  					sprintf(error_message,"Illegal init");
+	  					sprintf(solver_message,"Repos %c%d",'H'-ch_j,8-ch_i);
+	  				}
 	  			  show_menu(menu_man,0,0);
 	  			  reset_magnetic_grid(grid_manager);
 	  		  }
@@ -266,13 +295,14 @@ int main(void)
 			single_variation = 1;
 			current_status = player_control;
 			htim3.Init.Prescaler = 15999;
-			htim3.Init.Period = 999;
+			htim3.Init.Period = 99;
 			HAL_TIM_Base_Start_IT(&htim3);
 		}
 		else{
 			current_status = error;
 			origin_error = elaboration;
-			sprintf(error_message,"Do%s",info_message);
+			strcpy(solver_message,info_message);
+			sprintf(error_message,"Repos piece");
 			htim3.Init.Prescaler = 15999;
 			htim3.Init.Period = 9999;
 			HAL_TIM_Base_Start_IT(&htim3);
@@ -318,7 +348,7 @@ int main(void)
 		}
 	}
 	else if(current_status == error){
-		sprintf(tmp,"%2d",counter);
+		sprintf(tmp,"%2d %s",counter,solver_message);
 		lcd_send_string (error_message, 1);
 		lcd_send_string (tmp, 2);
 		HAL_Delay(10);
@@ -434,7 +464,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 				break;
 			case error:
 				HAL_TIM_Base_Stop_IT(&htim3);
-				counter = 10;
+				counter = 30;
 				single_variation = 1;
 
 				read_magnetic_grid(grid_manager, 0);
@@ -442,13 +472,19 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 				int coherence =	check_coherence(board,grid_manager);
 				int restoring = check_restoring(grid_manager);
 
-				if((origin_error == elaboration || origin_error == init) && check_coherence(board,grid_manager)){
+				if((origin_error == elaboration || origin_error == init) && coherence){
 					update_magnetic_grid(grid_manager);
 					if(origin_error == init) next_state = init;
 					else next_state = player_control;
 				}
 				else if(origin_error == player_control && restoring){
 					next_state = player_control;
+				}
+				else if((origin_error == elaboration || origin_error == init) && !coherence){
+					sprintf(solver_message,"Repos %c%d",'H'-ch_j,8-ch_i);
+				}
+				else if(origin_error == player_control && !restoring){
+					sprintf(solver_message,"Miss %c%d",'H'-ch_j,8-ch_i);
 				}
 
 				if(next_state == player_control){
@@ -467,11 +503,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 				set_valid_menu(menu_man,0);
 				set_valid_menu(menu_man,1);
 
-				init_board(board);
-				reset_magnetic_grid(grid_manager);
 				PLAYER_WHITE = 0;
 				WHITE_TURN = 1;
-				counter = 10;
+				SETTINGS = 1;
+				counter = 30;
 
 				break;
 		}

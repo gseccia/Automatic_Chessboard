@@ -45,7 +45,7 @@ void move_n_steps(Stepper* s, int number_of_steps, Step_direction direction){
 
 void move_half_cell(Stepper* stepper, Step_direction direction){
 	if(stepper->x)move_n_steps(stepper, 143, direction);
-	else move_n_steps(stepper, 160, direction);
+	else move_n_steps(stepper, 143, direction);
 }
 
 void move_full_cell(Stepper* stepper, Step_direction direction){

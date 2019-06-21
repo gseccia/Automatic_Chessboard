@@ -3,6 +3,7 @@
 typedef struct magnetic_grid_manager magnetic_grid_manager;
 extern int PLAYER_WHITE;
 extern int ch_i,ch_j;
+extern char p_mex[6];
 extern char board[BOARD_SIZE][BOARD_SIZE];
 
 uint16_t out_pins[8] = {GPIO_PIN_8,GPIO_PIN_15,GPIO_PIN_4,GPIO_PIN_5,GPIO_PIN_4,GPIO_PIN_10,GPIO_PIN_12,GPIO_PIN_11};
@@ -35,9 +36,13 @@ int check_restoring(magnetic_grid_manager* magnetic_grid_manager){
 	for(i=0;i<8;i++){
 		for(j=0;j<8;j++){
 				not_restored = ((magnetic_grid_manager->old_magnetic_grid)[i][j] != (magnetic_grid_manager->magnetic_grid)[i][j]);
-				ch_i = i;
-				ch_j = j;
-				if(not_restored)return 0;
+				if(not_restored){
+					ch_i = i;
+					ch_j = j;
+					if((magnetic_grid_manager->old_magnetic_grid)[i][j] == 0)strcpy(p_mex,"Added");
+					else strcpy(p_mex,"Miss");
+					return 0;
+				}
 		}
 	}
 	return 1;

@@ -103,7 +103,9 @@ char info_message[16] = "";
 char error_message[16];
 char end_message[16];
 char solver_message[16];
+char p_mex[6];
 char value_ch;
+
 Axis_manager* axis_manager;
 magnetic_grid_manager* grid_manager;
 menu_manager* menu_man;
@@ -124,6 +126,9 @@ int check_coherence(char board[BOARD_SIZE][BOARD_SIZE],magnetic_grid_manager* gr
 					(board[j][i] != EMPTY && (grid_manager->magnetic_grid)[i][j] == 0)){
 				ch_i = i;
 				ch_j = j;
+				if((grid_manager->magnetic_grid)[i][j] == 0) strcpy(p_mex,"Miss");
+				else if((grid_manager->magnetic_grid)[i][j] == 1) strcpy(p_mex,"Added");
+
 				return 0;
 			}
 		}
@@ -302,7 +307,7 @@ int main(void)
 			current_status = error;
 			origin_error = elaboration;
 			strcpy(solver_message,info_message);
-			sprintf(error_message,"Repos piece");
+			sprintf(error_message,"%s piece",p_mex);
 			htim3.Init.Prescaler = 15999;
 			htim3.Init.Period = 9999;
 			HAL_TIM_Base_Start_IT(&htim3);
@@ -436,6 +441,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 				else menu_ch = 1;
 				break;
 			case player_control:
+				if(strcmp(info_message,"CHECK") == 0){
+					strcpy(end_message,"You win!");
+					next_state = end_game;
+				}
 				player_stat = player_input_game_manager();
 				if(player_stat == 0){
 					next_state = elaboration;
@@ -481,10 +490,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 					next_state = player_control;
 				}
 				else if((origin_error == elaboration || origin_error == init) && !coherence){
-					sprintf(solver_message,"Repos %c%d",'H'-ch_j,8-ch_i);
+					sprintf(solver_message,"%s %c%d",p_mex,'H'-ch_j,8-ch_i);
 				}
 				else if(origin_error == player_control && !restoring){
-					sprintf(solver_message,"Miss %c%d",'H'-ch_j,8-ch_i);
+					sprintf(solver_message,"%s %c%d",p_mex,'H'-ch_j,8-ch_i);
 				}
 
 				if(next_state == player_control){

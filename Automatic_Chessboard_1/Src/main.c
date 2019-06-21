@@ -103,7 +103,6 @@ char info_message[16] = "";
 char error_message[16];
 char end_message[16];
 char solver_message[16];
-char p_mex[6];
 char value_ch;
 
 Axis_manager* axis_manager;
@@ -126,9 +125,6 @@ int check_coherence(char board[BOARD_SIZE][BOARD_SIZE],magnetic_grid_manager* gr
 					(board[j][i] != EMPTY && (grid_manager->magnetic_grid)[i][j] == 0)){
 				ch_i = i;
 				ch_j = j;
-				if((grid_manager->magnetic_grid)[i][j] == 0) strcpy(p_mex,"Miss");
-				else if((grid_manager->magnetic_grid)[i][j] == 1) strcpy(p_mex,"Add ");
-
 				return 0;
 			}
 		}
@@ -490,10 +486,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 					next_state = player_control;
 				}
 				else if((origin_error == elaboration || origin_error == init) && !coherence){
-					sprintf(solver_message,"%s %c%d",p_mex,'H'-ch_j,8-ch_i);
+					sprintf(solver_message,"Repos %c%d",'H'-ch_j,8-ch_i);
 				}
 				else if(origin_error == player_control && !restoring){
-					sprintf(solver_message,"%s %c%d",p_mex,'H'-ch_j,8-ch_i);
+					sprintf(solver_message,"Repos %c%d",'H'-ch_j,8-ch_i);
 				}
 
 				if(next_state == player_control){

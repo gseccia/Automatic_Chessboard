@@ -242,25 +242,33 @@ int main(void)
 	  if(prev_stat != current_status){
 	  		  lcd_clear();
 	  		  HAL_Delay(10);
-	  		  prev_stat = current_status;
 	  		  if(current_status == init){
-	  			if(prev_stat == end_game && !check_restoring(grid_manager)){
+	  			  if(prev_stat == end_game || prev_stat == error){
+	  				  	  	init_board(board);
+	  					  	reset_magnetic_grid(grid_manager);
+	  					  	lcd_send_string("Reset Motors'",1);
+	  					  	HAL_Delay(10);
+	  					  	lcd_send_string("Position",2);
+	  					  	HAL_Delay(10);
+	  					  	axis_manager_reset_position(axis_manager);
+	  			  }
+	  			if(prev_stat == end_game  && !check_restoring(grid_manager)){
 	  					current_status = error;
 	  					htim3.Init.Prescaler = 15999;
 	  					htim3.Init.Period = 999;
 	  					HAL_TIM_Base_Start_IT(&htim3);
 	  					origin_error = init;
-	  					init_board(board);
-	  					reset_magnetic_grid(grid_manager);
-	  					axis_manager_reset_position(axis_manager);
 
 	  					sprintf(error_message,"Illegal init");
 	  					sprintf(solver_message,"Repos %c%d",'H'-ch_j,8-ch_i);
-	  				}
+	  			}
 	  			  show_menu(menu_man,0,0);
+	  			  HAL_Delay(10);
 	  			  reset_magnetic_grid(grid_manager);
 	  		  }
 	  		  else if(current_status == choose_piece) show_menu(menu_man,2,0);
+	  		prev_stat = current_status;
+
 	  }
 
 	if ( current_status == init )

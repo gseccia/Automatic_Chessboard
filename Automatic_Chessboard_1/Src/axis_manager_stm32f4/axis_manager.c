@@ -73,18 +73,18 @@ void axis_manager_move(Axis_manager* axis,int start_row,int start_column,int end
 
 	if(drow < 0){
 		drow = -drow;
-		dirx = BACKWARD;
+		dirx = FORWARD;
 	}
-	else dirx = FORWARD;
+	else dirx = BACKWARD;
 
 	if(dcol < 0){
 			dcol = -dcol;
-			diry = BACKWARD;
+			diry = FORWARD;
 	}
-	else diry = FORWARD;
+	else diry = BACKWARD;
 
-	move_n_cells(&(axis->x_stepper), drow,dirx);
-	move_n_cells(&(axis->y_stepper), dcol,diry);
+	move_n_cells(&(axis->y_stepper), drow,dirx);
+	move_n_cells(&(axis->x_stepper), dcol,diry);
 
 	// Active hook
 	SERVO_HOOK_on(&(axis->hook));
@@ -98,18 +98,18 @@ void axis_manager_move(Axis_manager* axis,int start_row,int start_column,int end
 
 	if(drow < 0){
 			drow = -drow;
-			dirx = BACKWARD;
+			dirx = FORWARD;
 	}
-	else dirx = FORWARD;
+	else dirx = BACKWARD;
 
 	if(dcol < 0){
 				dcol = -dcol;
-				diry = BACKWARD;
+				diry = FORWARD;
 	}
-	else diry = FORWARD;
+	else diry = BACKWARD;
 
-	move_n_cells(&(axis->x_stepper), drow,dirx);
-	move_n_cells(&(axis->y_stepper), dcol,diry);
+	move_n_cells(&(axis->y_stepper), drow,dirx);
+	move_n_cells(&(axis->x_stepper), dcol,diry);
 
 	// Move on the cell
 	move_half_cell(&(axis->x_stepper),BACKWARD);

@@ -195,6 +195,8 @@ int main(void)
 	prev_stat = init;
 	init_board(board);
 
+    axis_manager_reset_position(axis_manager);
+
 	read_magnetic_grid(grid_manager,0);
 	if(!check_restoring(grid_manager)){
 		current_status = error;
@@ -210,7 +212,6 @@ int main(void)
 	}
 
 
-    axis_manager_reset_position(axis_manager);
 
   /* USER CODE END 2 */
 
@@ -258,8 +259,6 @@ int main(void)
 	else if(current_status == elaboration){
 		lcd_send_string ("Elaboration\0", 1);
 		play_computer_turn(board);
-		lcd_send_string (info_message, 2);
-		HAL_Delay(10);
 
 		read_magnetic_grid(grid_manager,0);
 		if(check_coherence(board,grid_manager)){

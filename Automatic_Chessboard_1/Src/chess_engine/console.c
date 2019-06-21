@@ -8,6 +8,7 @@
 
 #include "../axis_manager_stm32f4/axis_manager.h"
 #include "../magnetic_grid_interface_stm32/API_magneticGrid.h"
+#include "../lcd_interface_stm32f4/i2c-lcd.h"
 
 
 extern Axis_manager* axis_manager;
@@ -472,9 +473,9 @@ void set_location( location l, int white, char piece )
 // Our adapter methods
 
 void perform_move(char a_board[BOARD_SIZE][BOARD_SIZE], move *user_move){
+	int empty = a_board[user_move->to->column][user_move->to->row] == EMPTY;
 	do_move(a_board,user_move);
 	//Mossa sulla scacchiera reale
-	int empty = a_board[user_move->to->column][user_move->to->row] == EMPTY;
 	if(!empty) axis_manager_move(axis_manager,user_move->to->row,user_move->to->column,OUT_CHESSBOARD,OUT_CHESSBOARD);
 	axis_manager_move(axis_manager,user_move->from->row,user_move->from->column,user_move->to->row,user_move->to->column);
 }
@@ -1830,10 +1831,13 @@ void declare_winner(void)
 void play_computer_turn(char board[BOARD_SIZE][BOARD_SIZE])
 {
 	move *comuter_moves = get_rand_move_minmax(board);
+	sprintf(info_message,"%c%d => %c%d",('H'-comuter_moves->from->column),(8-comuter_moves->from->row),('H'-comuter_moves->to->column),(8-comuter_moves->to->row));
+	lcd_send_string (info_message, 2);
+	HAL_Delay(10);
+
 	perform_move(board,comuter_moves);
 	//printf("Computer: move ");
 	//print_move(comuter_moves);
-	sprintf(info_message,"(%d,%d) -> (%d,%d)",comuter_moves->from->row,comuter_moves->from->column,comuter_moves->to->row,comuter_moves->to->column);
 	// print_board(board,pretty_board);
 	free_move(comuter_moves);
 }  

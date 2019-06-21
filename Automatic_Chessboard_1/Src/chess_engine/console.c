@@ -1278,7 +1278,7 @@ move *get_n_moves(char a_board[BOARD_SIZE][BOARD_SIZE], location *from)
 	opt_locs[4].row = from->row - 1;	
 	opt_locs[4].column = from->column + 2;
 	opt_locs[5].row = from->row - 1;
-	opt_locs[5].column = from->column + 2;
+	opt_locs[5].column = from->column - 2;
 	opt_locs[6].row = from->row - 2;	
 	opt_locs[6].column = from->column + 1;
 	opt_locs[7].row = from->row - 2;	

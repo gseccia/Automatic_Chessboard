@@ -127,7 +127,7 @@ int check_coherence(char board[BOARD_SIZE][BOARD_SIZE],magnetic_grid_manager* gr
 				ch_i = i;
 				ch_j = j;
 				if((grid_manager->magnetic_grid)[i][j] == 0) strcpy(p_mex,"Miss");
-				else if((grid_manager->magnetic_grid)[i][j] == 1) strcpy(p_mex,"Added");
+				else if((grid_manager->magnetic_grid)[i][j] == 1) strcpy(p_mex,"Add ");
 
 				return 0;
 			}
@@ -307,7 +307,7 @@ int main(void)
 			current_status = error;
 			origin_error = elaboration;
 			strcpy(solver_message,info_message);
-			sprintf(error_message,"%s piece",p_mex);
+			sprintf(error_message,"Error piece");
 			htim3.Init.Prescaler = 15999;
 			htim3.Init.Period = 9999;
 			HAL_TIM_Base_Start_IT(&htim3);

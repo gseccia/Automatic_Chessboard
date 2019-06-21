@@ -39,7 +39,7 @@ int check_restoring(magnetic_grid_manager* magnetic_grid_manager){
 				if(not_restored){
 					ch_i = i;
 					ch_j = j;
-					if((magnetic_grid_manager->old_magnetic_grid)[i][j] == 0)strcpy(p_mex,"Added");
+					if((magnetic_grid_manager->old_magnetic_grid)[i][j] == 0)strcpy(p_mex,"Add ");
 					else strcpy(p_mex,"Miss");
 					return 0;
 				}
